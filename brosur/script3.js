@@ -74,6 +74,7 @@ const paperType = {
   ac210: "Art Carton 210gsm",
   ac230: "Art Carton 230gsm",
   ac260: "Art Carton 260gsm",
+  ac310: "Art Carton 310gsm",
   linen: "Linen",
   jasmine: "Jasmine",
 };
@@ -131,28 +132,28 @@ const digitalPaperPrice = {
 // =============================================
 const planoPaperPrice = {
   "65x100": {
-    HVS60: 750,
-    HVS70: 1000,
-    HVS80: 1100,
-    HVS100: 1300,
-    AP120: 1700,
-    AP150: 2000,
-    AC210: 3000,
-    AC230: 3200,
-    AC260: 3300,
-    AC310: 4200,
+    hvs60: 750,
+    hvs70: 1000,
+    hvs80: 1100,
+    hvs100: 1300,
+    ap120: 1700,
+    ap150: 2000,
+    ac210: 3000,
+    ac230: 3200,
+    ac260: 3300,
+    ac310: 4200,
   },
   "79x109": {
-    HVS60: 950,
-    HVS70: 1200,
-    HVS80: 1300,
-    HVS100: 1400,
-    AP120: 2200,
-    AP150: 2500,
-    AC210: 3100,
-    AC230: 3400,
-    AC260: 3600,
-    AC310: 4500,
+    hvs60: 950,
+    hvs70: 1200,
+    hvs80: 1300,
+    hvs100: 1400,
+    ap120: 2200,
+    ap150: 2500,
+    ac210: 3100,
+    ac230: 3400,
+    ac260: 3600,
+    ac310: 4500,
   },
 };
 
@@ -191,7 +192,7 @@ function getBracketQty(quantity) {
   return "101-300";
 }
 
-function getHargaKertasDigital(jenisKertas, quantity) {
+function getHargaKertasDigital(jenisKertas, quantity, mukaCetak) {
   const bracket = getBracketQty(quantity);
   const mukaKey = mukaCetak === "2" ? "2muka" : "1muka";
   return digitalPaperPrice[mukaKey][jenisKertas][bracket];
@@ -536,7 +537,7 @@ function tampilkanBreakdownConsole(hasil) {
 // BAGIAN DOM (hanya jalan di browser)
 // =============================================
 if (typeof document !== "undefined") {
-  const baseField = ["quantity", "ukuran_brosur", "jenis_kertas", "laminasi", "muka_cetak"];
+  const baseField = ["quantity", "ukuran_brosur", "jenis_kertas", "muka_cetak"];
 
   function elemAda(id) {
     return document.getElementById(id) !== null;
@@ -558,11 +559,18 @@ if (typeof document !== "undefined") {
       const el = document.getElementById(id);
       return el && el.value !== "" && el.value !== null;
     });
+    if (!dasarTerisi) return false;
+
     const laminasiEl = document.getElementById("laminasi");
-    const mukaTerisi =
-      laminasiEl.value === "Tidak Ada" ||
-      document.getElementById("muka_laminasi").value !== "";
-    return dasarTerisi && mukaTerisi;
+    if (!laminasiEl || laminasiEl.value === "") return false;
+
+    if (document.getElementById("ukuran_brosur").value === "custom") {
+      const p = parseFloat(document.getElementById("brosur_panjang").value);
+      const l = parseFloat(document.getElementById("brosur_lebar").value);
+      if (!p || !l) return false;
+    }
+
+    return true;
   }
 
   function updateOpsiMesinTersedia() {
@@ -622,13 +630,16 @@ if (typeof document !== "undefined") {
     document.getElementById("bahan").textContent = `${
       paperType[hasil.jenisKertas]
     }, uk. ${brochureSize[hasil.ukuranBrosur].label}`;
+    document.getElementById(
+      "mukaCetakInfo"
+    ).textContent = `${hasil.mukaCetak} Muka`;
 
     const finishingRow = document.getElementById("finishingRow");
     if (hasil.laminasi !== "Tidak Ada") {
       finishingRow.style.display = "";
       document.getElementById(
         "laminasiInfo"
-      ).textContent = `Laminasi ${hasil.laminasi} (${hasil.mukaLaminasi} muka)`;
+      ).textContent = `Laminasi ${hasil.laminasi}`;
     } else {
       finishingRow.style.display = "none";
     }
@@ -653,12 +664,11 @@ if (typeof document !== "undefined") {
     document.getElementById("brosur_lebar").disabled = true;
     document.getElementById("mesin_cetak").value = "";
     document.getElementById("mesin_cetak").disabled = true;
-    document.getElementById("muka_laminasi").value = "";
-    document.getElementById("muka_laminasi").disabled = true;
+    document.getElementById("muka_cetak").value = "";
     document.getElementById("saranMesin").textContent = "";
   }
 
-  baseField.concat(["muka_laminasi"]).forEach((id) => {
+  baseField.concat(["laminasi"]).forEach((id) => {
     const el = document.getElementById(id);
     if (el) {
       el.addEventListener("change", updateKelengkapanDanMesin);
