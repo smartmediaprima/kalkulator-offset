@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kalkulator Cetak Kalender Meja</title>
+
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+
+    <!-- Font Awesome untuk ikon -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+    />
+
+    <!-- Inter Font -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+    />
+    <link
+      rel="icon"
+      href="https://sinergigrafika.com/wp-content/uploads/2019/12/logoonly-sg.png"
+      sizes="32x32"
+    />
+    <link
+      rel="icon"
+      href="https://sinergigrafika.com/wp-content/uploads/2019/12/logoonly-sg.png"
+      sizes="192x192"
+    />
+    <link
+      rel="apple-touch-icon-precomposed"
+      href="https://sinergigrafika.com/wp-content/uploads/2019/12/logoonly-sg.png"
+    />
+
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f8f9fa;
+      }
+
+      .container {
+        max-width: 920px;
+        margin: 0 auto;
+      }
+
+      .header {
+        background-color: #0466c8;
+        color: white;
+        padding: 1rem 0;
+        margin-bottom: 30px;
+        border-radius: 0 0 10px 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      .header h3 {
+        font-weight: 700;
+      }
+
+      .card {
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+      }
+
+      .card-header {
+        background-color: #0466c8;
+        color: white;
+        padding: 1rem;
+        border-radius: 10px 10px 0 0;
+      }
+
+      .info-card {
+        background-color: #f1f8ff;
+        border-left: 5px solid #0d6efd;
+      }
+
+      .machine-card {
+        transition: all 0.3s;
+      }
+
+      .machine-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+      }
+
+      .sm74-card {
+        border-top: 5px solid #0d6efd;
+      }
+
+      .sm52-card {
+        border-top: 5px solid #198754;
+      }
+
+      .btn-primary {
+        background-color: #0d6efd;
+        border: none;
+        padding: 0.6rem 1.5rem;
+        font-weight: 500;
+      }
+
+      .total-row {
+        background-color: #f1f8ff;
+        font-weight: 600;
+      }
+
+      .price-per-piece {
+        background-color: #e8f4ff;
+      }
+
+      .badge-sm74 {
+        background-color: #0d6efd !important;
+      }
+
+      .badge-sm52 {
+        background-color: #198754 !important;
+      }
+
+      #resultCard {
+        display: none;
+      }
+
+      .table-simple {
+        margin-bottom: 0;
+      }
+
+      .table-simple td {
+        padding: 0.5rem;
+        vertical-align: top;
+        border-top: 1px solid #dee2e6;
+      }
+
+      .table-simple tr:first-child td {
+        border-top: none;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Header -->
+    <div class="header text-center">
+      <div class="container">
+        <h3>
+          <i class="fas fa-calendar-alt me-2"></i>Kalkulator Cetak Kalender Meja
+        </h3>
+      </div>
+    </div>
+
+    <div class="container">
+      <div
+        id="errorAlert"
+        class="alert alert-danger"
+        role="alert"
+        style="display: none"
+      ></div>
+
+      <div class="row">
+        <div class="col-md-5">
+          <div class="card mb-4">
+            <div class="card-header">
+              <h5 class="card-title mb-0">Hitung Biaya Cetak</h5>
+            </div>
+            <div class="card-body">
+              <form id="calculatorForm">
+                <div class="col mb-3">
+                  <label for="quantity" class="form-label">Jumlah/Oplah</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="quantity"
+                    min="100"
+                    step="50"
+                    required
+                  />
+                  <div class="invalid-feedback">
+                    Minimal 100pcs, kelipatan 50
+                  </div>
+                </div>
+
+                <div class="col mb-3">
+                  <label for="size" class="form-label">Ukuran Kalender</label>
+                  <select class="form-select" id="size" required>
+                    <option value="" disabled selected>Pilih ukuran...</option>
+                    <option value="15x21">15x21 cm (Landscape)</option>
+                    <option value="21x15">21x15 cm (Portrait)</option>
+                  </select>
+                </div>
+
+                <div class="col mb-3">
+                  <label for="type" class="form-label">Jenis Kalender</label>
+                  <select class="form-select" id="type" required>
+                    <option value="" disabled selected>Pilih jenis...</option>
+                    <option value="7">Dwiwulan + Cover (7 lembar)</option>
+                    <option value="13">Bulanan + Cover (13 lembar)</option>
+                  </select>
+                </div>
+
+                <div class="col mb-3">
+                  <label for="paper" class="form-label">Jenis Kertas</label>
+                  <select class="form-select" id="paper" required>
+                    <option value="" disabled selected>
+                      Pilih jenis kertas...
+                    </option>
+                    <option value="artCarton210">Art Carton 210gsm</option>
+                    <option value="artCarton230">Art Carton 230gsm</option>
+                    <option value="artCarton260">Art Carton 260gsm</option>
+                  </select>
+                </div>
+                <div class="col mb-3">
+                  <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <button type="submit" class="btn btn-primary">
+                      Hitung Biaya
+                    </button>
+                    <button
+                      type="button"
+                      id="resetBtn"
+                      class="btn btn-secondary"
+                    >
+                      Reset
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-7">
+          <div id="resultCard" class="card">
+            <div class="card-header">
+              <h5 class="mb-0">Hasil Kalkulasi</h5>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-simple">
+                  <tbody>
+                    <tr>
+                      <td><strong>Jumlah Cetak</strong></td>
+                      <td id="cetakDetail">-</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Bahan</strong></td>
+                      <td id="bahanDetail">-</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Finishing</strong></td>
+                      <td id="finishingDetail">-</td>
+                    </tr>
+                    <tr>
+                      <td colspan="3" style="padding: 15px; border: 0px"></td>
+                    </tr>
+                    <tr class="total-row">
+                      <td><strong>Total Biaya</strong></td>
+                      <td><strong id="totalBiaya">-</strong></td>
+                    </tr>
+                    <tr class="price-per-piece">
+                      <td><strong>Harga Satuan</strong></td>
+                      <td id="hargaPerBuah">-</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="mt-4 text-center text-muted">
+        <p>&copy; 2025 PT. Smart Media Prima</p>
+      </footer>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
+
+<!-- 
+Tambahkan beberapa hal berikut :
+
+- Tambahkan opsi mesin Digital Printing dan SM-74, menggunakan ukuran plano sama. Untuk mesin SM-74 menggunakan harga kertas, dengan harga kertas yang sudah tertera di paperPrices. Sedangkan mesin Digital tidak menggunakan harga kertas, tapi langsung menggunakan harga print yang disesuaikan dengan gambar dibawah. Untuk mesin Digital dipakai jika jumlah/oplah maks. 200pcs, setelahnya menggunakan SM-74
+
+- Tambahkan opsi laminasi, terdiri dari None, Doff dan Glossy.
+  * Untuk hitungan mesin Digital = qty x jumlah kalender x rate laminasi (Doff dan Glossy rata 1000)
+  * Untuk hitungan mesin SM-74 = panjang x lebar kertas x hasil pembagian plano x rate laminasi (Doff 0.25, Glossy 0.15)
+  * Tambahkan opsi jumlah muka yang dilaminasi, dengan rate laminasi x 2 jika mau laminasi 2 muka
+ -->

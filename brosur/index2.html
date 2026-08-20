@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kalkulator Cetak Brosur</title>
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+    />
+    <link
+      rel="icon"
+      href="https://sinergigrafika.com/wp-content/uploads/2019/12/logoonly-sg.png"
+      sizes="32x32"
+    />
+
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f8f9fa;
+      }
+      .row {
+        text-align: center;
+      }
+      input::-webkit-outer-spin-button,
+      input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        appearance: none;
+      }
+      .form-control {
+        text-align: center;
+        width: 100%;
+      }
+      .form-select {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background-image: none !important;
+        padding-right: 0 !important;
+        padding-left: 0 !important;
+        text-align: center;
+        font-weight: 600;
+        width: 100%;
+      }
+      .container {
+        max-width: 1000px;
+        margin: 0 auto;
+      }
+      .header {
+        background: linear-gradient(135deg, #0466c8 0%, #0354a0 100%);
+        color: white;
+        padding: 1rem 0;
+        margin-bottom: 30px;
+        border-radius: 0 0 10px 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+      .header h3 {
+        font-weight: 700;
+      }
+      .card {
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+      }
+      .card-header {
+        background: linear-gradient(135deg, #0466c8 0%, #0354a0 100%);
+        color: white;
+        padding: 1rem;
+        border-radius: 10px 10px 0 0;
+      }
+      .btn-primary {
+        background-color: #0d6efd;
+        border: none;
+        padding: 0.6rem 1.5rem;
+        font-weight: 500;
+      }
+      .table-result td {
+        padding: 0.75rem;
+        vertical-align: middle;
+        border-top: 1px solid #dee2e6;
+      }
+      .table-result tr:first-child td {
+        border-top: none;
+      }
+      .total-row {
+        background-color: #f1f8ff;
+        font-weight: 600;
+      }
+      .price-per-piece {
+        background-color: #e8f4ff;
+      }
+      .subtotal-row {
+        background-color: #fff8e1;
+      }
+      #resultCard {
+        display: none;
+      }
+      .mesin-section-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #6c757d;
+        margin-bottom: 0.5rem;
+        padding: 0.4rem 0.6rem;
+        background-color: #f1f3f5;
+        border-radius: 5px;
+      }
+      .saran-mesin {
+        font-size: 0.75rem;
+        color: #0466c8;
+        margin-top: 0.25rem;
+        display: block;
+        min-height: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header text-center">
+      <div class="container">
+        <h3>
+          <i class="fas fa-file-alt me-2"></i>Kalkulator Biaya Cetak Brosur
+        </h3>
+      </div>
+    </div>
+
+    <div class="container">
+      <div
+        id="errorAlert"
+        class="alert alert-danger"
+        role="alert"
+        style="display: none"
+      ></div>
+
+      <div class="row">
+        <!-- FORM COLUMN -->
+        <div class="col-md-5">
+          <div class="card">
+            <div class="card-header">
+              <i class="fas fa-sliders-h"></i> Spesifikasi Cetak
+            </div>
+            <div class="card-body">
+              <form id="calculatorForm">
+                <div class="mb-3">
+                  <label for="quantity" class="form-label">
+                    <i class="fab fa-buffer me-1"></i>Jumlah Cetak
+                  </label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="quantity"
+                    name="quantity"
+                    min="100"
+                    step="10"
+                    placeholder="min. 100, kelipatan 10"
+                    required
+                  />
+                  <div class="invalid-feedback">
+                    Minimal 100 pcs, kelipatan 10
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label for="ukuran_brosur" class="form-label">
+                    <i class="fas fa-ruler me-1"></i>Ukuran Brosur
+                  </label>
+                  <select
+                    class="form-select"
+                    id="ukuran_brosur"
+                    name="ukuran_brosur"
+                    required
+                  >
+                    <option value="" disabled selected>Pilih ukuran...</option>
+                    <option value="32x48">32x48 cm / A3+</option>
+                    <option value="21x29.7">21x29.7 cm / A4</option>
+                    <option value="14.8x21">14.8x21 cm / A5</option>
+                  </select>
+                </div>
+
+                <div class="mb-3">
+                  <label for="jenis_kertas" class="form-label">
+                    <i class="fas fa-file me-1"></i>Jenis Kertas
+                  </label>
+                  <select
+                    class="form-select"
+                    id="jenis_kertas"
+                    name="jenis_kertas"
+                    required
+                  >
+                    <option value="" disabled selected>
+                      Pilih jenis kertas...
+                    </option>
+                    <option value="HVS70">HVS 70gsm</option>
+                    <option value="HVS80">HVS 80gsm</option>
+                    <option value="HVS100">HVS 100gsm</option>
+                    <option value="AP120">Art Paper 120gsm</option>
+                    <option value="AP150">Art Paper 150gsm</option>
+                    <option value="AC210">Art Carton 210gsm</option>
+                    <option value="AC230">Art Carton 230gsm</option>
+                    <option value="AC260">Art Carton 260gsm</option>
+                  </select>
+                </div>
+
+                <div class="mb-3">
+                  <label for="laminasi" class="form-label">
+                    <i class="fab fa-buffer me-1"></i>Laminasi
+                  </label>
+                  <select
+                    class="form-select"
+                    id="laminasi"
+                    name="laminasi"
+                    required
+                  >
+                    <option value="" disabled selected>
+                      Pilih laminasi...
+                    </option>
+                    <option value="Tidak Ada">Tidak Ada</option>
+                    <option value="Doff">Doff</option>
+                    <option value="Glossy">Glossy</option>
+                  </select>
+                </div>
+
+                <!-- MESIN SECTION -->
+                <div class="mb-3 mesin-wrapper">
+                  <label for="mesin_cetak" class="form-label">
+                    <i class="fas fa-print me-1"></i>Mesin Cetak
+                  </label>
+                  <select
+                    class="form-select"
+                    id="mesin_cetak"
+                    name="mesin_cetak"
+                    required
+                    disabled
+                  >
+                    <option value="" disabled selected>Pilih opsi...</option>
+                    <option value="Digital Printing">Digital Printing</option>
+                    <option value="Offset-52">Offset-52 (Ryobi/GTO)</option>
+                    <option value="SM-52">Speedmaster-52 (Offset)</option>
+                  </select>
+                  <small class="saran-mesin" id="saranMesin"></small>
+                </div>
+
+                <div class="d-flex gap-2 justify-content-end mt-3">
+                  <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-calculator me-1"></i> Hitung Biaya
+                  </button>
+                  <button type="button" id="resetBtn" class="btn btn-secondary">
+                    Reset
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- RESULT COLUMN -->
+        <div class="col-md-7">
+          <div id="resultCard" class="card">
+            <div class="card-header">
+              <i class="fas fa-receipt"></i> Hasil Perhitungan
+            </div>
+            <div class="card-body">
+              <div class="machine-badge-wrap">
+                <span class="machine-badge-label">Mesin:</span>
+                <span id="mesinBadge" class="badge"></span>
+                <span
+                  id="planoInfo"
+                  style="
+                    font-size: 0.78rem;
+                    color: var(--muted);
+                    font-weight: 500;
+                  "
+                ></span>
+              </div>
+
+              <table class="result-table">
+                <tbody>
+                  <tr>
+                    <td>Jumlah Cetak</td>
+                    <td id="jumlahCetak"></td>
+                  </tr>
+                  <tr>
+                    <td>Bahan</td>
+                    <td id="bahan"></td>
+                  </tr>
+                  <tr id="finishingRow" style="display: none">
+                    <td>Laminasi</td>
+                    <td id="laminasiInfo"></td>
+                  </tr>
+
+                  <tr class="spacer-row">
+                    <td colspan="2"></td>
+                  </tr>
+
+                  <tr class="row-total">
+                    <td>Total Biaya Jual</td>
+                    <td id="totalBiaya"></td>
+                  </tr>
+                  <tr class="row-satuan">
+                    <td>Harga Satuan</td>
+                    <td id="hargaSatuan"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="text-center text-muted py-4">
+        <p>
+          <i class="fas fa-copyright me-1"></i
+          ><span id="tahun-dinamis"></span> PT. Smart Media Prima
+        </p>
+      </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      document.getElementById("tahun-dinamis").innerHTML =
+        new Date().getFullYear();
+    </script>
+    <script src="script 2.js"></script>
+  </body>
+</html>

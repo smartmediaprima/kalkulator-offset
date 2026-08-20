@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kalkulator Cetak Buku</title>
+
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+
+    <!-- Font Awesome untuk ikon -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+    />
+
+    <!-- Inter Font -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+    />
+    <link
+      rel="icon"
+      href="https://sinergigrafika.com/wp-content/uploads/2019/12/logoonly-sg.png"
+      sizes="32x32"
+    />
+
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f8f9fa;
+      }
+
+      .row {
+        text-align: center;
+      }
+
+      input::-webkit-outer-spin-button,
+      input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        appearance: none;
+      }
+
+      .form-control {
+        text-align: center;
+        width: 100%;
+      }
+
+      .form-select {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background-image: none !important;
+        padding-right: 0 !important;
+        padding-left: 0 !important;
+        text-align: center;
+        font-weight: 600;
+        width: 100%;
+      }
+
+      .container {
+        max-width: 1000px;
+        margin: 0 auto;
+      }
+
+      .header {
+        background-color: #0466c8;
+        color: white;
+        padding: 1rem 0;
+        margin-bottom: 30px;
+        border-radius: 0 0 10px 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      .header h3 {
+        font-weight: 700;
+      }
+
+      .card {
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+      }
+
+      .card-header {
+        background-color: #0466c8;
+        color: white;
+        padding: 1rem;
+        border-radius: 10px 10px 0 0;
+      }
+
+      .info-card {
+        background-color: #f1f8ff;
+        border-left: 5px solid #0d6efd;
+      }
+
+      .machine-card {
+        transition: all 0.3s;
+      }
+
+      .machine-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+      }
+
+      .sm52-card {
+        border-top: 5px solid #0466c8;
+      }
+
+      .offset52-card {
+        border-top: 5px solid #ff6b35;
+      }
+
+      .digital-card {
+        border-top: 5px solid #198754;
+      }
+
+      .btn-primary {
+        background-color: #0d6efd;
+        border: none;
+        padding: 0.6rem 1.5rem;
+        font-weight: 500;
+      }
+
+      .table-result td {
+        padding: 0.5rem;
+        vertical-align: top;
+        border-top: 1px solid #dee2e6;
+      }
+
+      .table-result tr:first-child td {
+        border-top: none;
+      }
+
+      .total-row {
+        background-color: #f1f8ff;
+        font-weight: 600;
+      }
+
+      .price-per-piece {
+        background-color: #e8f4ff;
+      }
+
+      .badge-sm52 {
+        background-color: #0466c8 !important;
+      }
+
+      .badge-offset52 {
+        background-color: #ff6b35 !important;
+      }
+
+      .badge-digital {
+        background-color: #198754 !important;
+      }
+
+      #resultCard {
+        display: none;
+      }
+
+      .table-result td {
+        padding: 0.75rem;
+        vertical-align: middle;
+      }
+
+      .mesin-section-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #6c757d;
+        margin-bottom: 0.5rem;
+        padding: 0.4rem 0.6rem;
+        background-color: #f1f3f5;
+        border-radius: 5px;
+      }
+
+      .saran-mesin {
+        font-size: 0.75rem;
+        color: #0466c8;
+        margin-top: 0.25rem;
+        display: block;
+        min-height: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Header -->
+    <div class="header text-center">
+      <div class="container">
+        <h3><i class="fas fa-book me-2"></i>Kalkulator Biaya Cetak Buku</h3>
+      </div>
+    </div>
+
+    <div class="container">
+      <div
+        id="errorAlert"
+        class="alert alert-danger"
+        role="alert"
+        style="display: none"
+      ></div>
+
+      <div class="row">
+        <div class="col-md-5">
+          <div class="card mb-4">
+            <div class="card-header">
+              <h5 class="card-title mb-0">Hitung Biaya Cetak</h5>
+            </div>
+            <div class="card-body">
+              <form id="calculatorForm">
+                <div class="row mb-3">
+                  <div class="col">
+                    <label for="quantity_exp" class="form-label"
+                      >Jumlah Cetak</label
+                    >
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="quantity_exp"
+                      name="quantity_exp"
+                      required
+                    />
+                  </div>
+
+                  <div class="col">
+                    <label for="ukuran_buku" class="form-label"
+                      >Ukuran Buku</label
+                    >
+                    <select
+                      class="form-select"
+                      id="ukuran_buku"
+                      name="ukuran_buku"
+                      required
+                    >
+                      <option value="" disabled selected>Pilih opsi...</option>
+                      <option value="21x29.7">A4 / 21x29.7 cm</option>
+                      <option value="17.6x25">B5 / 17.6x25 cm</option>
+                      <option value="14.8x21">A5 / 14.8x21 cm</option>
+                      <option value="10.5x14.8">A6 / 10.5x14.8 cm</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- COVER SECTION -->
+                <div class="mesin-section-label mb-2">
+                  <i class="fas fa-book-open me-1"></i> Spesifikasi Cover
+                </div>
+
+                <div class="row mb-3">
+                  <div class="col">
+                    <label for="jenis_cover" class="form-label"
+                      >Jenis Kertas Cover</label
+                    >
+                    <select
+                      class="form-select"
+                      id="jenis_cover"
+                      name="jenis_cover"
+                      required
+                    >
+                      <option value="" disabled selected>Pilih opsi...</option>
+                      <option value="AP120">Art Paper 120gsm</option>
+                      <option value="AP150">Art Paper 150gsm</option>
+                      <option value="AC210">Art Carton 210gsm</option>
+                      <option value="AC230">Art Carton 230gsm</option>
+                      <option value="AC260">Art Carton 260gsm</option>
+                    </select>
+                  </div>
+                  <div class="col">
+                    <label for="muka_cover" class="form-label"
+                      >Cetak Cover</label
+                    >
+                    <select
+                      class="form-select"
+                      id="muka_cover"
+                      name="muka_cover"
+                      required
+                    >
+                      <option value="" disabled selected>Pilih opsi...</option>
+                      <option value="1">1 Muka</option>
+                      <option value="2">2 Muka</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="row mb-3">
+                  <div class="col">
+                    <label for="tipe_cover" class="form-label"
+                      >Tipe Cover</label
+                    >
+                    <select
+                      class="form-select"
+                      id="tipe_cover"
+                      name="tipe_cover"
+                      required
+                    >
+                      <option value="" disabled selected>Pilih opsi...</option>
+                      <option value="soft_cover">Soft Cover</option>
+                      <option value="hard_cover">Hard Cover</option>
+                    </select>
+                  </div>
+
+                  <div class="col">
+                    <label for="laminasi" class="form-label"
+                      >Laminasi Cover</label
+                    >
+                    <select
+                      class="form-select"
+                      id="laminasi"
+                      name="laminasi"
+                      required
+                    >
+                      <option value="" disabled selected>Pilih opsi...</option>
+                      <option value="Tidak Ada">Tidak Ada</option>
+                      <option value="Doff">Doff</option>
+                      <option value="Glossy">Glossy</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="col mb-3">
+                  <label for="mesin_cover" class="form-label"
+                    >Mesin Cetak Cover</label
+                  >
+                  <select
+                    class="form-select"
+                    id="mesin_cover"
+                    name="mesin_cover"
+                    required
+                    disabled
+                  >
+                    <option value="" disabled selected>Pilih opsi...</option>
+                    <option value="Digital Printing">Digital Printing</option>
+                    <option value="SM-52">Speedmaster-52 (Offset)</option>
+                    <option value="SM-74">Speedmaster-74 (Offset)</option>
+                  </select>
+                  <small class="saran-mesin" id="saranMesinCover"></small>
+                </div>
+
+                <!-- ISI SECTION -->
+                <div class="mesin-section-label mb-2">
+                  <i class="fas fa-file-alt me-1"></i> Spesifikasi Isi
+                </div>
+
+                <div class="row mb-3">
+                  <div class="col">
+                    <label for="jenis_isi" class="form-label"
+                      >Jenis Kertas Isi</label
+                    >
+                    <select
+                      class="form-select"
+                      id="jenis_isi"
+                      name="jenis_isi"
+                      required
+                    >
+                      <option value="" disabled selected>Pilih opsi...</option>
+                      <option value="HVS60">HVS 60gsm</option>
+                      <option value="HVS70">HVS 70gsm</option>
+                      <option value="HVS80">HVS 80gsm</option>
+                      <option value="HVS100">HVS 100gsm</option>
+                      <option value="AP120">Art Paper 120gsm</option>
+                      <option value="AP150">Art Paper 150gsm</option>
+                    </select>
+                  </div>
+                  <div class="col">
+                    <label for="quantity_isi" class="form-label"
+                      >Jumlah Halaman Isi</label
+                    >
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="quantity_isi"
+                      name="quantity_isi"
+                      min="1"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div class="row mb-3">
+                  <div class="col">
+                    <label for="jenis_cetak_isi" class="form-label"
+                      >Jenis Cetak Isi</label
+                    >
+                    <select
+                      class="form-select"
+                      id="jenis_cetak_isi"
+                      name="jenis_cetak_isi"
+                      required
+                    >
+                      <option value="" disabled selected>Pilih opsi...</option>
+                      <option value="1warna">1 Warna (B/W)</option>
+                      <option value="2warna">2 Warna</option>
+                      <option value="4warna">4 Warna (CMYK)</option>
+                    </select>
+                  </div>
+                  <div class="col">
+                    <label for="mesin_isi" class="form-label"
+                      >Mesin Cetak Isi</label
+                    >
+                    <select
+                      class="form-select"
+                      id="mesin_isi"
+                      name="mesin_isi"
+                      required
+                      disabled
+                    >
+                      <option value="" disabled selected>Pilih opsi...</option>
+                      <option value="Digital Printing">Digital Printing</option>
+                      <option value="PhotoCopy">Print Fotokopi</option>
+                      <option value="Ryobi-52">Ryobi-52</option>
+                      <option value="SM-52">Speedmaster-52</option>
+                      <option value="SM-74">Speedmaster-74</option>
+                    </select>
+                    <small class="saran-mesin" id="saranMesinIsi"></small>
+                  </div>
+                </div>
+
+                <!-- FINISHING SECTION -->
+                <div class="mesin-section-label mb-2">
+                  <i class="fas fa-cut me-1"></i> Spesifikasi Finishing
+                </div>
+
+                <div class="row mb-3">
+                  <div class="col">
+                    <label for="opsi_kemasan" class="form-label"
+                      >Jenis Pengemasan</label
+                    >
+                    <select
+                      class="form-select"
+                      id="opsi_kemasan"
+                      name="opsi_kemasan"
+                      required
+                    >
+                      <option value="" disabled selected>Pilih opsi...</option>
+                      <option value="Tidak Ada">Tidak Ada</option>
+                      <option value="Plastik">Plastik</option>
+                      <option value="Shrink">Shrink</option>
+                    </select>
+                  </div>
+                  <div class="col">
+                    <label for="opsi_jilid" class="form-label"
+                      >Jenis Jilid</label
+                    >
+                    <select
+                      class="form-select"
+                      id="opsi_jilid"
+                      name="opsi_jilid"
+                      required
+                    >
+                      <option value="" disabled selected>Pilih opsi...</option>
+                      <option value="Binding">Binding</option>
+                      <option value="Staples">Staples</option>
+                      <option value="Spiral">Spiral</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="col d-grid gap-2 d-md-flex justify-content-md-end">
+                  <button type="submit" class="btn btn-primary">
+                    Hitung Biaya
+                  </button>
+                  <button type="button" id="resetBtn" class="btn btn-secondary">
+                    Reset
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-7">
+          <div id="resultCard" class="card">
+            <div class="card-header">
+              <h5 class="mb-0">Hasil Perhitungan</h5>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-result">
+                  <tbody>
+                    <tr>
+                      <td><strong>Jumlah Cetak</strong></td>
+                      <td id="jumlahCetakExp"></td>
+                    </tr>
+                    <tr>
+                      <td><strong>Cover</strong></td>
+                      <td id="coverInfo"></td>
+                    </tr>
+                    <tr>
+                      <td><strong>Isi</strong></td>
+                      <td id="isiInfo"></td>
+                    </tr>
+                    <tr id="finishingRow">
+                      <td><strong>Finishing</strong></td>
+                      <td id="finishingInfo"></td>
+                    </tr>
+                    <tr>
+                      <td colspan="2" style="padding: 15px; border: 0px"></td>
+                    </tr>
+                    <tr class="total-row">
+                      <td><strong>Total Biaya</strong></td>
+                      <td id="totalBiaya"></td>
+                    </tr>
+                    <tr class="price-per-piece">
+                      <td>Harga Satuan</td>
+                      <td id="hargaSatuan"></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="mt-4 text-center text-muted">
+        <p>&copy; 2025 PT. Smart Media Prima</p>
+      </footer>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="script.js"></script>
+  </body>
+</html>
