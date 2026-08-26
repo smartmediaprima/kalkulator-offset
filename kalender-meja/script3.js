@@ -70,9 +70,10 @@ function getJadiPerPlano(calendarType) {
 
 function getDefaultMarginPct(machineType, qty) {
   if (machineType === "digital") return 68;
-  if (qty <= 300) return 38;
-  if (qty >= 500) return 28;
-  return 36;
+  if (qty <= 300) return 38; // dibawah 300
+  if (qty >= 500) return 35; // diatas 500
+  if (qty >= 1000) return 28; // diatas 1k
+  return 36; // 301 - 499
 }
 
 // ═══════════════════════════════════════════
@@ -359,7 +360,7 @@ function hitungBiayaKalender(
     calendarType,
     laminationType
   );
-  const hadiah = 60000;
+  const hadiah = 30000;
   const subtotal = paperCost + printCost + finishingCost + laminationCost;
 
   const defaultMarginPct = getDefaultMarginPct(machineType, qty);
