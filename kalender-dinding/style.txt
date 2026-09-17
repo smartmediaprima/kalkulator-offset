@@ -1,0 +1,261 @@
+<style>
+      body {
+        background: #eaf4fc;
+      }
+  
+      .page-hero {
+        background: linear-gradient(160deg, #1b5fa8 20%, #2e86de 60%, #f45b90 100%);
+        color: #eaf4fc;
+        padding: 2rem 0;
+        text-align: center;
+      }
+  
+      .page-hero h1 {
+        font-size: 2.2rem;
+        font-weight: 700;
+        font-family: "Fraunces", serif;
+      }
+  
+      .calc-wrap {
+        max-width: 1080px;
+        padding: 2rem 0 0 0;
+        margin: 0 auto;
+      }
+  
+      .calc-wrap .row {
+        text-align: center;
+      }
+  
+      .calc-wrap .card {
+        border-radius: 12px;
+        border: none;
+        box-shadow: 0 4px 15px rgba(27, 42, 65, .08);
+        margin-bottom: 2rem;
+        overflow: hidden;
+        transition: all .3s ease;
+      }
+  
+      .calc-wrap .card:hover {
+        box-shadow: 0 8px 25px rgba(27, 42, 65, .12);
+      }
+  
+      .calc-wrap .card-header {
+        background: linear-gradient(135deg, #1b5fa8 0%, #2e86de 100%);
+        color: #fff;
+        padding: 1.2rem;
+        border: none;
+      }
+  
+      .calc-wrap .card-header h5 {
+        margin: 0;
+        font-weight: 600;
+        font-size: 1.1rem;
+      }
+  
+      .calc-wrap .card-body {
+        padding: 1.5rem;
+      }
+  
+      .calc-wrap .spec-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+      }
+  
+      .calc-wrap .result-section {
+        margin-bottom: 1.5rem;
+      }
+  
+      .calc-wrap .result-value {
+        font-size: 1.1rem;
+        color: #1b2a41;
+        font-weight: 500;
+      }
+  
+      .calc-wrap .price-highlight {
+        background: linear-gradient(135deg, #fff0f5 0%, #fbb6ce 100%);
+        border-left: 4px solid #f45b90;
+        padding: 1.2rem;
+        border-radius: 8px;
+        margin-top: 1.5rem;
+        cursor: default;
+        /* clickabele ganti ke "pointer" */
+      }
+  
+      .calc-wrap .result-label {
+        font-weight: 600;
+        color: #1b2a41;
+        font-size: .9rem;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+        margin-bottom: .3rem;
+      }
+  
+      .calc-wrap .total-price {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #1b5fa8;
+        margin-bottom: .5rem;
+      }
+  
+      .calc-wrap .per-piece-price {
+        font-size: 1.1rem;
+        color: #666;
+      }
+  
+      .calc-wrap .form-label {
+        font-weight: 500;
+        color: #1b2a41;
+        margin-bottom: .5rem;
+      }
+  
+      .calc-wrap .form-control,
+      .calc-wrap .form-select {
+        -webkit-appearance: none;
+        appearance: none;
+        background-image: none;
+        border: 2px solid #e0e6ed;
+        border-radius: 8px;
+        padding: .5rem 0;
+        transition: all .3s ease;
+        text-align: center;
+        font-weight: 600;
+        font-size: .95rem;
+      }
+  
+      .calc-wrap .form-control:focus,
+      .calc-wrap .form-select:focus {
+        border-color: #2e86de;
+        box-shadow: 0 0 0 .2rem rgba(46, 134, 222, .15);
+      }
+  
+      input::-webkit-outer-spin-button,
+      input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        appearance: none;
+      }
+  
+      .rekomendasi-text {
+        font-size: .75rem;
+        color: #1b5fa8;
+        margin-top: .25rem;
+        display: block;
+        min-height: 1rem;
+      }
+  
+      .calc-wrap .btn-primary {
+        background: linear-gradient(135deg, #1b5fa8 0%, #2e86de 100%);
+        border: none;
+        padding: .7rem 1.5rem;
+        font-weight: 500;
+        border-radius: 8px;
+        transition: all .3s ease;
+      }
+  
+      .calc-wrap .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(46, 134, 222, .3);
+      }
+  
+      .calc-wrap .btn-secondary {
+        background-color: #6c757d;
+        border: none;
+        padding: .7rem 1.5rem;
+        font-weight: 500;
+        border-radius: 8px;
+        transition: all .3s ease;
+      }
+  
+      .calc-wrap .btn-secondary:hover {
+        transform: translateY(-2px);
+        background-color: #5a6268;
+      }
+  
+      .price-per-piece {
+        background: linear-gradient(135deg, #fff0f5 0%, #fbb6ce 100%);
+      }
+  
+      .badge-sm74 {
+        background-color: #1b5fa8 !important;
+      }
+  
+      .badge-sm66 {
+        background-color: #198754 !important;
+      }
+  
+      .badge-digital {
+        background-color: #f45b90 !important;
+      }
+  
+      .modal-header-custom {
+        background: linear-gradient(135deg, #1b5fa8 0%, #2e86de 100%);
+        color: #fff;
+        padding: 1rem 1.2rem;
+      }
+  
+      .modal-section-title {
+        font-size: .7rem;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        color: #64748b;
+        border-bottom: 1px solid #e2e8f0;
+        padding-bottom: 6px;
+        margin-bottom: 8px;
+      }
+  
+      .modal-total-box {
+        background: #1b2a41;
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin-top: 8px;
+      }
+  
+      .modal-total-box .text-muted {
+        color: #94a3b8 !important;
+        font-size: .82rem;
+      }
+  
+      .modal-big-price {
+        color: #fff;
+        font-size: 1.25rem;
+        font-weight: 800;
+      }
+  
+      .modal-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: .82rem;
+        padding: 3px 0;
+        color: #374151;
+      }
+  
+      .modal-row.total-row-inner {
+        border-top: 1px solid #e2e8f0;
+        margin-top: 4px;
+        padding-top: 6px;
+        font-weight: 600;
+      }
+  
+      #resultCard {
+        display: none;
+      }
+  
+      @media (max-width: 767px) {
+        .calc-wrap {
+          padding: 30px;
+        }
+  
+        .calc-header h3 {
+          font-size: 1.2rem;
+        }
+  
+        .calc-wrap .spec-grid {
+          grid-template-columns: 1fr;
+        }
+  
+        .calc-wrap .total-price {
+          font-size: 1.8rem;
+        }
+      }
+    </style>

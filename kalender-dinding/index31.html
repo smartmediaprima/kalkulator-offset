@@ -36,7 +36,7 @@
       }
 
       .container {
-        max-width: 1100px;
+        max-width: 1080px;
         margin: 0 auto;
       }
       .row {
@@ -57,7 +57,7 @@
       .card {
         border-radius: 12px;
         border: none;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        box-shadow: 0 4px 15px rgba(27, 42, 65, 0.08);
         margin-bottom: 2rem;
         overflow: hidden;
         transition: all 0.3s ease;
@@ -244,35 +244,55 @@
 
       <div class="row">
         <!-- Form -->
-        <div class="col-md-5">
+        <div class="col-lg-6">
           <div class="card mb-4">
             <div class="card-header">
               <h5><i class="fas fa-calculator me-2"></i>Hitung Biaya Cetak</h5>
             </div>
             <div class="card-body">
               <form id="calculatorForm">
-                <div class="col mb-3">
-                  <label for="quantity" class="form-label">
-                    <i class="fab fa-buffer me-1"></i>Jumlah / Oplah
-                  </label>
-                  <input
-                    type="number"
-                    class="form-control"
-                    id="quantity"
-                    min="100"
-                    step="10"
-                    placeholder="Min. 100, kelipatan 10"
-                    required
-                  />
-                  <div class="invalid-feedback">
-                    Minimal 100 pcs, kelipatan 10
+                <div class="row mb-3">
+                  <div class="col">
+                    <label for="quantity" class="form-label"
+                      ><i class="fab fa-buffer me-1"></i>Jumlah / Oplah</label
+                    >
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="quantity"
+                      min="100"
+                      step="10"
+                      placeholder="Min. 100, kelipatan 10"
+                      required
+                    />
+                    <div class="invalid-feedback">
+                      Minimal 100 pcs, kelipatan 10
+                    </div>
+                  </div>
+                  <div class="col">
+                    <label for="type" class="form-label"
+                      ><i class="far fa-calendar me-1"></i>Jenis Kalender</label
+                    >
+                    <select class="form-select" id="type" required>
+                      <option value="" disabled selected>
+                        Pilih jenis kalender...
+                      </option>
+                      <option value="1">Bulanan (1 lembar)</option>
+                      <option value="3">Caturwulan (3 lembar)</option>
+                      <option value="4">Triwulan (4 lembar)</option>
+                      <option value="5">Triwulan + Cover (5 lembar)</option>
+                      <option value="6">Dwiwulan (6 lembar)</option>
+                      <option value="7">Dwiwulan + Cover (7 lembar)</option>
+                      <option value="12">Bulanan (12 lembar)</option>
+                      <option value="13">Bulanan + Cover (13 lembar)</option>
+                    </select>
                   </div>
                 </div>
 
                 <div class="col mb-3">
-                  <label for="size" class="form-label">
-                    <i class="fas fa-ruler me-1"></i>Ukuran Kalender
-                  </label>
+                  <label for="size" class="form-label"
+                    ><i class="fas fa-ruler me-1"></i>Ukuran Kalender</label
+                  >
                   <select class="form-select" id="size" required>
                     <option value="" disabled selected>Pilih ukuran...</option>
                     <option value="32x48 cm">32x48 cm / A3+</option>
@@ -303,50 +323,30 @@
                   </div>
                 </div>
 
-                <div class="col mb-3">
-                  <label for="type" class="form-label">
-                    <i class="far fa-calendar me-1"></i>Jenis Kalender
-                  </label>
-                  <select class="form-select" id="type" required>
-                    <option value="" disabled selected>
-                      Pilih jenis kalender...
-                    </option>
-                    <option value="1">Bulanan (1 lembar)</option>
-                    <option value="3">Caturwulan (3 lembar)</option>
-                    <option value="4">Triwulan (4 lembar)</option>
-                    <option value="5">Triwulan + Cover (5 lembar)</option>
-                    <option value="6">Dwiwulan (6 lembar)</option>
-                    <option value="7">Dwiwulan + Cover (7 lembar)</option>
-                    <option value="12">Bulanan (12 lembar)</option>
-                    <option value="13">Bulanan + Cover (13 lembar)</option>
-                  </select>
-                </div>
-
-                <div class="col mb-3">
-                  <label for="paper" class="form-label">
-                    <i class="fas fa-file me-1"></i>Jenis Kertas
-                  </label>
-                  <select class="form-select" id="paper" required>
-                    <option value="" disabled selected>
-                      Pilih jenis kertas...
-                    </option>
-                    <option value="hvs70">HVS 70gsm</option>
-                    <option value="hvs80">HVS 80gsm</option>
-                    <option value="hvs100">HVS 100gsm</option>
-                    <option value="ap120">Art Paper 120gsm</option>
-                    <option value="ap150">Art Paper 150gsm</option>
-                    <option value="ac210">Art Carton 210gsm</option>
-                    <option value="ac230">Art Carton 230gsm</option>
-                    <option value="ac260">Art Carton 260gsm</option>
-                    <option value="ac310">Art Carton 310gsm</option>
-                  </select>
-                </div>
-
                 <div class="row mb-3">
                   <div class="col">
-                    <label for="lamination" class="form-label">
-                      <i class="fab fa-buffer me-1"></i>Laminasi
-                    </label>
+                    <label for="paper" class="form-label"
+                      ><i class="fas fa-file me-1"></i>Jenis Kertas</label
+                    >
+                    <select class="form-select" id="paper" required>
+                      <option value="" disabled selected>
+                        Pilih jenis kertas...
+                      </option>
+                      <option value="hvs70">HVS 70gsm</option>
+                      <option value="hvs80">HVS 80gsm</option>
+                      <option value="hvs100">HVS 100gsm</option>
+                      <option value="ap120">Art Paper 120gsm</option>
+                      <option value="ap150">Art Paper 150gsm</option>
+                      <option value="ac210">Art Carton 210gsm</option>
+                      <option value="ac230">Art Carton 230gsm</option>
+                      <option value="ac260">Art Carton 260gsm</option>
+                      <option value="ac310">Art Carton 310gsm</option>
+                    </select>
+                  </div>
+                  <div class="col">
+                    <label for="lamination" class="form-label"
+                      ><i class="fab fa-buffer me-1"></i>Laminasi</label
+                    >
                     <select class="form-select" id="lamination" required>
                       <option value="" disabled selected>
                         Pilih laminasi...
@@ -356,10 +356,13 @@
                       <option value="glossy">Glossy</option>
                     </select>
                   </div>
+                </div>
+
+                <div class="row mb-3">
                   <div class="col">
-                    <label for="finishing" class="form-label">
-                      <i class="fas fa-stapler me-1"></i>Finishing
-                    </label>
+                    <label for="finishing" class="form-label"
+                      ><i class="fas fa-stapler me-1"></i>Finishing</label
+                    >
                     <select class="form-select" id="finishing" required>
                       <option value="" disabled selected>
                         Pilih finishing...
@@ -368,26 +371,24 @@
                       <option value="Spiral">Spiral</option>
                     </select>
                   </div>
-
-                  <!-- Mesin Cetak — dengan teks rekomendasi di bawahnya -->
-                </div>
-                <div class="col mb-3">
-                  <label for="mesinPilihan" class="form-label">
-                    <i class="fas fa-print me-1"></i>Mesin Cetak
-                  </label>
-                  <select
-                    class="form-select"
-                    id="mesinPilihan"
-                    name="mesinPilihan"
-                    required
-                    disabled
-                  >
-                    <option value="" disabled selected>Pilih opsi...</option>
-                    <option value="Digital Printing">Digital Printing</option>
-                    <option value="SM-66">Speedmaster-66</option>
-                    <option value="SM-74">Speedmaster-74</option>
-                  </select>
-                  <div id="rekomendasiMesin" class="rekomendasi-text"></div>
+                  <div class="col">
+                    <label for="mesinPilihan" class="form-label"
+                      ><i class="fas fa-print me-1"></i>Mesin Cetak</label
+                    >
+                    <select
+                      class="form-select"
+                      id="mesinPilihan"
+                      name="mesinPilihan"
+                      required
+                      disabled
+                    >
+                      <option value="" disabled selected>Pilih opsi...</option>
+                      <option value="Digital Printing">Digital Printing</option>
+                      <option value="SM-66">Speedmaster-66</option>
+                      <option value="SM-74">Speedmaster-74</option>
+                    </select>
+                    <div id="rekomendasiMesin" class="rekomendasi-text"></div>
+                  </div>
                 </div>
 
                 <div class="d-grid gap-2 d-md-flex justify-content-md-end">
@@ -404,7 +405,7 @@
         </div>
 
         <!-- Hasil -->
-        <div class="col-md-7">
+        <div class="col-lg-6">
           <div id="resultCard" class="card">
             <div class="card-header">
               <h5><i class="fas fa-receipt me-2"></i>Hasil Kalkulasi</h5>

@@ -5,6 +5,7 @@
 const sizeData = {
   "15x21": { panjang: 15, lebar: 21 },
   "21x15": { panjang: 21, lebar: 15 },
+  custom: { panjang: 0, lebar: 0 },
 };
 
 const planoData = {
@@ -64,8 +65,18 @@ function getMachineType(qty) {
   return qty <= 100 ? "digital" : "sm52";
 }
 
-function getJadiPerPlano(calendarType) {
-  return calendarType < 8 ? Math.ceil(calendarType / 4) : calendarType / 4;
+function getSheetsPerPlano(effectiveSize) {
+  const [calW, calH] = effectiveSize.split("x").map(Number);
+  const { panjang: planoW, lebar: planoH } = planoData["33x43"];
+  // Coba dua orientasi, ambil yang paling banyak
+  const fit1 = Math.floor(planoW / calW) * Math.floor(planoH / calH);
+  const fit2 = Math.floor(planoW / calH) * Math.floor(planoH / calW);
+  return Math.max(fit1, fit2, 1); // min 1 untuk hindari pembagian nol
+}
+
+function getJadiPerPlano(calendarType, effectiveSize) {
+  const sheetsPerPlano = getSheetsPerPlano(effectiveSize);
+  return Math.ceil(calendarType / sheetsPerPlano);
 }
 
 function getDefaultMarginPct(machineType, qty) {
@@ -87,10 +98,15 @@ function calculatePaperCost(machineType, qty, totalPlano, paperType) {
   return Math.round(totalPlano / 500) * prices.perRim;
 }
 
-function calculatePrintCost(machineType, qty, calendarType, paperType) {
+function calculatePrintCost(
+  machineType,
+  qty,
+  calendarType,
+  paperType,
+  jadiPerPlano
+) {
   if (machineType === "digital") {
-    const jpPlano = getJadiPerPlano(calendarType);
-    return qty * jpPlano * paperData[paperType].prices.digital;
+    return qty * jadiPerPlano * paperData[paperType].prices.digital;
   }
   const sets = Math.ceil(calendarType / 2);
   const base = sets * 280000;
@@ -102,13 +118,15 @@ function calculateLaminationCost(
   machineType,
   qty,
   calendarType,
-  laminationType
+  laminationType,
+  jadiPerPlano
 ) {
   if (laminationType === "none") return 0;
   const rate = laminationRates[machineType][laminationType];
-  const jpPlano = getJadiPerPlano(calendarType);
   const totalPlano =
-    machineType === "sm52" ? (qty + 100) * jpPlano : qty * jpPlano;
+    machineType === "sm52"
+      ? (qty + 100) * jadiPerPlano // ← pakai param
+      : qty * jadiPerPlano;
   if (machineType === "digital") return totalPlano * rate;
   const { panjang, lebar } = planoData["33x43"];
   return panjang * lebar * rate * totalPlano;
@@ -118,38 +136,78 @@ function calculateLaminationCost(
 //  PLANO SKETCH
 // ═══════════════════════════════════════════
 
-function generatePlanoSketch(size) {
-  const [calW, calH] = size.split("x").map(Number);
-  const W = 170,
-    H = Math.round((W * 33) / 43); // ≈ 130
-  const hw = W / 2,
-    hh = H / 2;
+function generatePlanoSketch(effectiveSize) {
+  const [kPanjang, kLebar] = effectiveSize.split("x").map(Number);
+  const p = planoData["33x43"]; // { panjang: 33, lebar: 43 }
 
-  const cell = (cx, cy) => `
-    <rect x="${cx + 2}" y="${cy + 2}" width="${hw - 4}" height="${
-    hh - 4
-  }" fill="#c8e6ff" rx="2"/>
-    <text x="${cx + hw / 2}" y="${
-    cy + hh / 2 - 6
-  }" text-anchor="middle" font-size="11" font-weight="700" fill="#0354a0">${calW}×${calH}</text>
-    <text x="${cx + hw / 2}" y="${
-    cy + hh / 2 + 8
-  }" text-anchor="middle" font-size="8" fill="#0466c8">cm</text>`;
+  const o1 = {
+    cols: Math.floor(p.panjang / kPanjang),
+    rows: Math.floor(p.lebar / kLebar),
+  };
+  const o2 = {
+    cols: Math.floor(p.lebar / kPanjang),
+    rows: Math.floor(p.panjang / kLebar),
+  };
+
+  const useO1 = o1.cols * o1.rows >= o2.cols * o2.rows;
+  const ori = useO1 ? { ...o1 } : { ...o2 };
+  let pw = useO1 ? p.panjang : p.lebar;
+  let ph = useO1 ? p.lebar : p.panjang;
+
+  let kw = kPanjang,
+    kh = kLebar;
+
+  let [finalPw, finalPh] = ph > pw ? [ph, pw] : [pw, ph];
+  if (ph > pw) {
+    [ori.cols, ori.rows] = [ori.rows, ori.cols];
+    [kw, kh] = [kh, kw];
+  }
+
+  let rects = "";
+  for (let r = 0; r < ori.rows; r++) {
+    for (let c = 0; c < ori.cols; c++) {
+      const x = c * kw,
+        y = r * kh;
+      rects += `
+        <rect x="${x}" y="${y}" width="${kw}" height="${kh}"
+              fill="#e8f4ff" stroke="#0466c8" stroke-width="0.25"/>
+        ${
+          c < ori.cols - 1
+            ? `<line x1="${(c + 1) * kw}" y1="0" x2="${
+                (c + 1) * kw
+              }" y2="${finalPh}"
+                   stroke="#0466c8" stroke-width="0.5" stroke-dasharray="4,3"/>`
+            : ""
+        }
+        ${
+          r < ori.rows - 1
+            ? `<line x1="0" y1="${(r + 1) * kh}" x2="${finalPw}" y2="${
+                (r + 1) * kh
+              }"
+                   stroke="#0466c8" stroke-width="0.5" stroke-dasharray="4,3"/>`
+            : ""
+        }
+        <text x="${x + kw / 2}" y="${y + kh / 2}" text-anchor="middle"
+              dominant-baseline="middle"
+              font-size="${Math.min(kw, kh) * 0.18}"
+              fill="#0354a0" font-weight="700">
+          ${kLebar}×${kPanjang}
+        </text>`;
+    }
+  }
+
+  const totalLembar = ori.cols * ori.rows;
 
   return `
-    <svg viewBox="0 0 ${W} ${
-    H + 22
-  }" width="100%" style="max-width:175px;display:inline-block">
-      <rect x="1" y="1" width="${W - 2}" height="${
-    H - 2
-  }" fill="#e8f4ff" stroke="#0466c8" stroke-width="1.5" rx="3"/>
-      ${cell(0, 0)}${cell(hw, 0)}${cell(0, hh)}${cell(hw, hh)}
-      <line x1="${hw}" y1="0" x2="${hw}" y2="${H}" stroke="#0466c8" stroke-width="1" stroke-dasharray="4,3"/>
-      <line x1="0" y1="${hh}" x2="${W}" y2="${hh}" stroke="#0466c8" stroke-width="1" stroke-dasharray="4,3"/>
-      <text x="${W / 2}" y="${
-    H + 16
-  }" text-anchor="middle" font-size="8.5" fill="#888">33×43 cm · 4 lembar/plano</text>
-    </svg>`;
+    <svg viewBox="0 0 ${finalPw} ${finalPh}"
+         style="width:100%; max-width:200px; display:inline-block;"
+         xmlns="http://www.w3.org/2000/svg">
+      <rect width="${finalPw}" height="${finalPh}" fill="#e8f4ff" stroke="#0466c8" stroke-width="1" rx="2"/>
+      ${rects}
+    </svg>
+    <div class="text-center text-muted mt-1" style="font-size:11px;">
+      33×43 cm · ${totalLembar} lembar/plano (${ori.cols}×${ori.rows})
+    </div>`;
 }
 
 // ═══════════════════════════════════════════
@@ -192,7 +250,7 @@ function buildModalContent(ctx) {
   const {
     machineType,
     quantity,
-    size,
+    size: effectiveSize,
     calendarType,
     jadiPerPlano,
     totalPlano,
@@ -222,7 +280,7 @@ function buildModalContent(ctx) {
   // Header
   document.getElementById(
     "modalTitle"
-  ).textContent = `${calendarType} lembar · ${size} cm`;
+  ).textContent = `${calendarType} lembar · ${effectiveSize} cm`;
   document.getElementById("modalMachineBadge").innerHTML = IS_DIG
     ? '<span class="badge badge-digital">Digital Printing</span>'
     : '<span class="badge badge-sm52">SM-52</span>';
@@ -232,7 +290,7 @@ function buildModalContent(ctx) {
 
   // Plano sketch
   document.getElementById("modalPlanoSketch").innerHTML =
-    generatePlanoSketch(size);
+    generatePlanoSketch(effectiveSize);
 
   // Paper / Kertas section
   let paperHtml;
@@ -341,8 +399,19 @@ function hitungBiayaKalender(
   }
 
   const machineType = getMachineType(qty);
+  // Resolusi ukuran efektif
+  let effectiveSize = size;
+  if (size === "custom") {
+    const p = parseInt(document.getElementById("sizePanjang").value);
+    const l = parseInt(document.getElementById("sizeLebar").value);
+    if (!p || !l || p < 1 || l < 1) {
+      showError("Masukkan ukuran custom yang valid (panjang dan lebar).");
+      return null;
+    }
+    effectiveSize = `${p}x${l}`;
+  }
   const plano = "33x43 cm";
-  const jadiPerPlano = getJadiPerPlano(calendarType);
+  const jadiPerPlano = getJadiPerPlano(calendarType, effectiveSize);
   const totalPlano =
     machineType === "sm52" ? (qty + 100) * jadiPerPlano : qty * jadiPerPlano;
 
@@ -351,14 +420,16 @@ function hitungBiayaKalender(
     machineType,
     qty,
     calendarType,
-    paperType
+    paperType,
+    jadiPerPlano
   );
   const finishingCost = (qty + 10) * 10000;
   const laminationCost = calculateLaminationCost(
     machineType,
     qty,
     calendarType,
-    laminationType
+    laminationType,
+    jadiPerPlano
   );
   const hadiah = 30000;
   const subtotal = paperCost + printCost + finishingCost + laminationCost;
@@ -422,7 +493,7 @@ function hitungBiayaKalender(
   buildModalContent({
     machineType,
     quantity: qty,
-    size,
+    size: effectiveSize,
     calendarType,
     jadiPerPlano,
     totalPlano,
@@ -442,7 +513,7 @@ function hitungBiayaKalender(
     machineType,
     calendarType: parseInt(calendarType),
     jenis_kertas: paperData[paperType].name,
-    ukuran_kalender: size + " cm",
+    ukuran_kalender: effectiveSize + " cm",
     plano,
     jadiPerPlano,
     totalPlano,
@@ -467,7 +538,7 @@ function resetForm() {
   document.getElementById("calculatorForm").reset();
   document.getElementById("resultCard").style.display = "none";
   document.getElementById("errorAlert").style.display = "none";
-  document.getElementById("machineInfo").style.display = "none";
+  // document.getElementById("machineInfo").style.display = "none";
   lastCalcData = null;
 }
 
@@ -507,19 +578,19 @@ function displayResults(hasil) {
     "Rp " + formatCurrency(hasil.pricePerPiece);
 }
 
-function updateMachineInfo(qty) {
-  const el = document.getElementById("machineInfo");
-  const text = document.getElementById("machineInfoText");
-  if (qty >= 100) {
-    text.textContent =
-      getMachineType(qty) === "digital"
-        ? "Digital Printing (maks. 100 pcs)"
-        : "Mesin SM-52 (di atas 100 pcs)";
-    el.style.display = "block";
-  } else {
-    el.style.display = "none";
-  }
-}
+// function updateMachineInfo(qty) {
+//   const el = document.getElementById("machineInfo");
+//   const text = document.getElementById("machineInfoText");
+//   if (qty >= 100) {
+//     text.textContent =
+//       getMachineType(qty) === "digital"
+//         ? "Digital Printing (maks. 100 pcs)"
+//         : "Mesin SM-52 (di atas 100 pcs)";
+//     el.style.display = "block";
+//   } else {
+//     el.style.display = "none";
+//   }
+// }
 
 // ═══════════════════════════════════════════
 //  EVENT LISTENERS
@@ -529,8 +600,27 @@ document.getElementById("quantity").addEventListener("input", function () {
   const v = parseInt(this.value);
   const ok = !isNaN(v) && v >= 100 && v % 50 === 0;
   this.classList.toggle("is-invalid", !ok);
-  if (ok) updateMachineInfo(v);
-  else document.getElementById("machineInfo").style.display = "none";
+  // if (ok) updateMachineInfo(v);
+  // else document.getElementById("machineInfo").style.display = "none";
+});
+
+document.getElementById("size").addEventListener("change", function () {
+  const pEl = document.getElementById("sizePanjang");
+  const lEl = document.getElementById("sizeLebar");
+
+  if (this.value === "custom") {
+    pEl.disabled = false;
+    lEl.disabled = false;
+    pEl.value = "";
+    lEl.value = "";
+    pEl.focus();
+  } else {
+    const dim = sizeData[this.value];
+    pEl.disabled = true;
+    lEl.disabled = true;
+    pEl.value = dim ? dim.panjang : "";
+    lEl.value = dim ? dim.lebar : "";
+  }
 });
 
 document.getElementById("type").addEventListener("input", function () {

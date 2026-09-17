@@ -104,6 +104,7 @@ const laminasi = {
 };
 
 let hasilTerakhir = null;
+
 /* =====================================================================
    HELPERS
    ===================================================================== */
@@ -333,7 +334,7 @@ function hitungBiayaKalender(
   const biayaPotong =
     !isDigital && jenisFinishing !== "Spiral" ? hitungBiayaPotong(quantity) : 0;
 
-  // --- Potong ---
+  // --- Hadiah ---
   const hadiah = 30000;
 
   // --- Total ---
@@ -349,7 +350,8 @@ function hitungBiayaKalender(
     rekomendasiPlano,
     isDigital,
     quantity,
-    ukuran,
+    ukuran, // key asli (dipakai internal, mis. sizeData lookup)
+    ukuranLabel: `${dataUkuran.lebar}x${dataUkuran.panjang} cm`,
     jumlahLembar,
     namaKertas: paperName[jenisKertas],
     namaJenisKalender: jenisKalender[jumlahLembar] || `${jumlahLembar} lembar`,
@@ -379,7 +381,6 @@ function hitungBiayaKalender(
     hargaSatuan,
   };
 
-  logBreakdownPerhitungan(hasil);
   return hasil;
 }
 
@@ -481,7 +482,7 @@ function buildModalContent(h) {
   // Header
   document.getElementById(
     "modalTitle"
-  ).textContent = `${h.namaJenisKalender} · ${h.ukuran}`;
+  ).textContent = `${h.namaJenisKalender} · ${h.ukuranLabel}`;
   document.getElementById("modalMachineBadge").innerHTML = h.isDigital
     ? `<span class="badge badge-digital">Digital Printing</span>`
     : h.mesin === "SM-74"
@@ -575,113 +576,6 @@ function buildModalContent(h) {
   updateModalTotals(defaultMarginPct);
 }
 
-function logBreakdownPerhitungan(h) {
-  const garis = "=".repeat(60);
-  const garisTipis = "-".repeat(60);
-  console.clear();
-  console.log(garis);
-  console.log(
-    "%cBREAKDOWN PERHITUNGAN",
-    "display: block; text-align: center; font-weight: bold;"
-  );
-  console.log(garis);
-  console.log(`Mesin: ${h.mesin} || Quantity: ${formatNumber(h.quantity)} pcs`);
-  console.log(`Ukuran: ${h.ukuran} || Jenis: ${h.namaJenisKalender}`);
-  console.log(`Kertas: ${h.namaKertas}`);
-
-  if (!h.isDigital) {
-    const ppk = h.planoPerKalender;
-    console.log(garisTipis);
-    console.log("BIAYA PLANO");
-    console.log(
-      `Plano terpilih: ${h.planoKode} || Jadi/Plano: ${h.jadiPerPlano} pcs`
-    );
-    console.log(`Kebutuhan Plano: ${formatDecimal(ppk)} lembar plano`);
-    // console.log(
-    //   `  (${h.jumlahLembar} lembar ÷ ${h.jadiPerPlano} jadi = ${formatDecimal(
-    //     ppk
-    //   )} → dibulatkan ke atas)`
-    // );
-    console.log(
-      `Total Kertas: ${formatNumber(
-        h.jumlahKertas
-      )} lembar || Harga/lembar: Rp ${formatCurrency(h.hargaKertas)}`
-    );
-    console.log(`Biaya Kertas: Rp ${formatCurrency(h.biayaKertas)}`);
-  } else {
-    console.log(garisTipis);
-    console.log("BIAYA KERTAS (Digital)");
-    console.log(
-      `Jumlah lembar: ${formatNumber(
-        h.jumlahKertas
-      )} || Harga/lembar: Rp ${formatCurrency(h.hargaKertas)}`
-    );
-    console.log(`Biaya Kertas: Rp 0 (sudah termasuk dalam biaya cetak)`);
-  }
-
-  console.log(garisTipis);
-  console.log("BIAYA CETAK");
-  if (!h.isDigital) {
-    console.log(
-      `Jumlah Cetak: ${formatNumber(
-        h.jumlahCetak
-      )} set || Harga/set: Rp ${formatCurrency(h.hargaCetak)}`
-    );
-    if (h.jumlahOverprint > 0) {
-      console.log(
-        `Overprint: ${formatNumber(
-          h.jumlahOverprint
-        )} lembar || Biaya overprint: Rp ${formatCurrency(h.biayaOverprint)}`
-      );
-    }
-  } else {
-    console.log(
-      `Jumlah lembar cetak: ${formatNumber(
-        h.jumlahCetak
-      )} || Harga/lembar: Rp ${formatCurrency(h.hargaCetak)}`
-    );
-  }
-  console.log(`Biaya Cetak: Rp ${formatCurrency(h.biayaCetak)}`);
-
-  console.log(garisTipis);
-  console.log("BIAYA LAMINASI & FINISHING");
-  if (h.namaLaminasi !== "Tidak Ada") {
-    console.log(
-      `Laminasi: ${h.namaLaminasi} || Biaya: Rp ${formatCurrency(
-        h.biayaLaminasi
-      )}`
-    );
-  } else {
-    console.log("Laminasi: Tidak Ada");
-  }
-  console.log(
-    `Finishing: ${h.jenisFinishing} (${formatNumber(
-      h.jumlahFinishing
-    )} pcs) || Biaya: Rp ${formatCurrency(h.biayaFinishing)}`
-  );
-  console.log(`Biaya Potong: Rp ${formatCurrency(h.biayaPotong)}`);
-  console.log("");
-
-  console.log(garis);
-  console.log(
-    `Subtotal: Rp ${formatCurrency(h.subtotal)} || HPP/pcs: Rp ${formatCurrency(
-      h.hpp
-    )}`
-  );
-  console.log(
-    `Margin: ${(h.margin * 100).toFixed(
-      0
-    )}% || Hadiah Langsung: Rp ${formatCurrency(h.hadiah)}`
-  );
-  console.log(
-    `Total Biaya: Rp ${formatCurrency(
-      h.totalBiaya
-    )} || Harga/pcs: Rp ${formatCurrency(h.hargaSatuan)}`
-  );
-  console.log(garis);
-  console.log("");
-}
-
 /* =====================================================================
                                 UI HELPERS
    ===================================================================== */
@@ -721,9 +615,8 @@ function displayResults(h) {
   document.getElementById("jumlahCetak").textContent = `${formatNumber(
     h.quantity
   )} pcs (${h.jumlahLembar} lembar/set)`;
-  document.getElementById(
-    "bahan"
-  ).textContent = `${h.namaKertas}, uk. ${h.ukuran}`;
+  document.getElementById("bahan").textContent = h.namaKertas;
+  document.getElementById("ukuranDetail").textContent = h.ukuranLabel;
 
   let finishingText = h.jenisFinishing;
   if (h.namaLaminasi !== "Tidak Ada") finishingText += `, ${h.namaLaminasi}`;
@@ -767,7 +660,7 @@ function updateRekomendasi() {
   if (isDigital) {
     rekEl.textContent = "✦ Rekomendasi: Digital Printing";
     mesinSelect.value = "Digital Printing";
-    mesinSelect.disabled = true; // ← ditambahkan
+    mesinSelect.disabled = true;
     return;
   }
 
@@ -819,11 +712,13 @@ document.getElementById("marginInput").addEventListener("input", function () {
   updateModalTotals(this.value);
 });
 
-// Isi iframe saat totalBiaya diklik (sebelum modal terbuka)
-document.getElementById("totalBiaya").addEventListener("click", function () {
-  if (!hasilTerakhir) return;
-  buildModalContent(hasilTerakhir);
-});
+// Isi modal saat area total biaya (price-highlight) diklik, sebelum modal terbuka
+document
+  .getElementById("priceHighlight")
+  .addEventListener("click", function () {
+    if (!hasilTerakhir) return;
+    buildModalContent(hasilTerakhir);
+  });
 
 document
   .getElementById("calculatorForm")
