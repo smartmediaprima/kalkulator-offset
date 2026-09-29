@@ -19,7 +19,7 @@ const paperData = {
     prices: {
       perLembar: 650, // qty < 1000, per lembar
       perRim: 310000, // qty >= 1000, per 500 lembar
-      digital: 3700, // digital printing, per plano
+      digital: 3800, // digital printing, per plano
     },
   },
   AC230: {
@@ -27,7 +27,7 @@ const paperData = {
     prices: {
       perLembar: 750,
       perRim: 330000,
-      digital: 3800,
+      digital: 3900,
     },
   },
   AC260: {
@@ -35,7 +35,7 @@ const paperData = {
     prices: {
       perLembar: 850,
       perRim: 350000,
-      digital: 3900,
+      digital: 4000,
     },
   },
   AC310: {
@@ -43,7 +43,7 @@ const paperData = {
     prices: {
       perLembar: 1100,
       perRim: 400000,
-      digital: 4100,
+      digital: 4200,
     },
   },
 };
@@ -62,7 +62,7 @@ function formatCurrency(n) {
 }
 
 function getMachineType(qty) {
-  return qty <= 100 ? "digital" : "sm52";
+  return qty <= 150 ? "digital" : "sm52";
 }
 
 function getSheetsPerPlano(effectiveSize) {
@@ -385,8 +385,8 @@ function hitungBiayaKalender(
     showError("Mohon lengkapi semua data.");
     return null;
   }
-  if (qty < 100 || qty % 50 !== 0) {
-    showError("Jumlah minimal 100 pcs dan harus dalam kelipatan 50.");
+  if (qty % 10 !== 0) {
+    showError("Jumlah harus dalam kelipatan 10.");
     return null;
   }
   if (calendarType < 1 || !Number.isInteger(parseFloat(calendarType))) {
@@ -423,7 +423,7 @@ function hitungBiayaKalender(
     paperType,
     jadiPerPlano
   );
-  const finishingCost = (qty + 10) * 10000;
+  const finishingCost = (qty + 10) * 12000;
   const laminationCost = calculateLaminationCost(
     machineType,
     qty,
@@ -598,7 +598,7 @@ function displayResults(hasil) {
 
 document.getElementById("quantity").addEventListener("input", function () {
   const v = parseInt(this.value);
-  const ok = !isNaN(v) && v >= 100 && v % 50 === 0;
+  const ok = !isNaN(v) && v % 10 === 0;
   this.classList.toggle("is-invalid", !ok);
   // if (ok) updateMachineInfo(v);
   // else document.getElementById("machineInfo").style.display = "none";

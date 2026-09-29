@@ -53,11 +53,6 @@
         padding: 0;
       }
 
-      .container {
-        max-width: 1100px;
-        margin: 0 auto;
-      }
-
       .row {
         text-align: center;
       }
@@ -67,17 +62,14 @@
         color: white;
         padding: 1rem 0;
         margin-bottom: 30px;
+        text-align: center;
         /* border-radius: 15px; */
         box-shadow: 0 4px 12px rgba(4, 102, 200, 0.3);
       }
 
       .header h3 {
         font-weight: 700;
-        font-size: 1.8rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
+        font-size: 2.2rem;
       }
 
       .card {
@@ -365,9 +357,8 @@
                       type="number"
                       class="form-control"
                       id="quantity"
-                      min="100"
-                      step="50"
-                      placeholder="Min. 100, kelipatan 50"
+                      step="10"
+                      placeholder="Kelipatan 10"
                       required
                     />
                     <!-- <div
@@ -421,7 +412,6 @@
                       type="number"
                       id="sizePanjang"
                       class="form-control"
-                      style="width: 78px"
                       placeholder="P"
                       disabled
                       min="1"
@@ -431,7 +421,6 @@
                       type="number"
                       id="sizeLebar"
                       class="form-control"
-                      style="width: 78px"
                       placeholder="L"
                       disabled
                       min="1"
