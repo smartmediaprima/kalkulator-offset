@@ -443,52 +443,6 @@ function hitungBiayaKalender(
   // Store for dynamic margin updates
   lastCalcData = { subtotal, hadiah, quantity: qty, defaultMarginPct };
 
-  // Console log
-  console.clear();
-  console.log(
-    "%c=== SPESIFIKASI ===",
-    "color:#0466c8;font-weight:bold;font-size:13px"
-  );
-  console.log(
-    `Mesin: ${
-      machineType === "digital" ? "Digital" : "SM-52"
-    } | Plano: ${plano}`
-  );
-  console.log(
-    `Qty: ${formatCurrency(
-      qty
-    )} pcs | Ukuran: ${size} cm | ${calendarType} lembar`
-  );
-  console.log(
-    `Jadi/plano: ${jadiPerPlano} | Total plano: ${formatCurrency(totalPlano)}`
-  );
-  if (laminationType !== "none") console.log(`Laminasi: ${laminationType}`);
-  console.log(
-    "%c=== RINCIAN BIAYA ===",
-    "color:#0466c8;font-weight:bold;font-size:13px"
-  );
-  if (machineType === "sm52")
-    console.log(`Kertas     : Rp ${formatCurrency(paperCost)}`);
-  console.log(`Cetak      : Rp ${formatCurrency(printCost)}`);
-  console.log(`Finishing  : Rp ${formatCurrency(finishingCost)}`);
-  if (laminationCost > 0)
-    console.log(`Laminasi   : Rp ${formatCurrency(laminationCost)}`);
-  console.log(
-    "%c=== TOTAL ===",
-    "color:#0466c8;font-weight:bold;font-size:13px"
-  );
-  console.log(
-    `Subtotal   : Rp ${formatCurrency(subtotal)} | HPP/pcs: Rp ${formatCurrency(
-      hpp
-    )}`
-  );
-  console.log(`Margin     : ${defaultMarginPct}%`);
-  console.log(
-    `Total      : Rp ${formatCurrency(
-      totalCost
-    )} | Harga/pcs: Rp ${formatCurrency(pricePerPiece)}`
-  );
-
   // Build modal
   buildModalContent({
     machineType,
