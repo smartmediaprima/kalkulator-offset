@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kalkulator Cetak Terpadu</title>
+    <title>Kalkulator Cetak Block Note & Nota</title>
 
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
@@ -12,6 +12,11 @@
     <link
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
       rel="stylesheet"
+    />
+    <link
+      rel="icon"
+      href="https://sinergigrafika.com/wp-content/uploads/2019/12/logoonly-sg.png"
+      sizes="32x32"
     />
     <link
       rel="stylesheet"
@@ -23,9 +28,15 @@
     />
 
     <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
       body {
         font-family: "Inter", sans-serif;
-        background-color: #f8f9fa;
+        background: #eaf4fc;
+        min-height: 100vh;
       }
       input::-webkit-outer-spin-button,
       input::-webkit-inner-spin-button {
@@ -44,28 +55,27 @@
         font-weight: 600;
         width: 100%;
       }
-      .container-custom {
-        max-width: 1100px;
-        margin: 0 auto;
-      }
+
       .header {
         background: linear-gradient(135deg, #0466c8 0%, #0354a0 100%);
         color: white;
-        padding: 1.5rem 0;
-        margin-bottom: 30px;
-        border-radius: 0 0 15px 15px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 2rem 0;
+        text-align: center;
       }
       .header h3 {
+        font-size: 2.2rem;
         font-weight: 700;
-        margin: 0;
-        font-size: 1.5rem;
       }
-      .header p {
-        margin: 5px 0 0 0;
-        opacity: 0.8;
-        font-size: 0.9rem;
+
+      .container-custom {
+        max-width: 1080px;
+        padding: 15px 0 15px;
+        margin: 0 auto;
       }
+      .container-custom .row {
+        text-align: center;
+      }
+
       .card {
         border-radius: 12px;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
@@ -74,24 +84,13 @@
         overflow: hidden;
       }
       .card-header {
-        background: linear-gradient(135deg, #0466c8 0%, #0354a0 100%);
+        background: linear-gradient(135deg, #1b5fa8 0%, #2e86de 100%);
         color: white;
         padding: 1rem 1.25rem;
         font-weight: 600;
         border-bottom: none;
       }
-      .btn-primary {
-        background-color: #0d6efd;
-        border: none;
-        padding: 0.6rem 1.5rem;
-        font-weight: 600;
-        transition: all 0.2s;
-      }
-      .btn-primary:hover {
-        background-color: #0b5ed7;
-        transform: translateY(-1px);
-      }
-      /* Product Type Switcher */
+
       .product-selector {
         display: flex;
         gap: 10px;
@@ -116,82 +115,134 @@
         background-color: #e8f4ff;
         color: #0466c8;
       }
-      /* Result Table Styling */
+      .form-select:disabled {
+        background-color: #e9ecef;
+        opacity: 0.8;
+      }
+      .btn-primary {
+        background-color: linear-gradient(135deg, #1b5fa8 0%, #2e86de 100%);
+        border: none;
+        padding: 0.6rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.2s;
+      }
+      .btn-primary:hover {
+        background-color: #0b5ed7;
+        transform: translateY(-1px);
+      }
       #resultCard {
         display: none;
         animation: fadeIn 0.4s ease-in-out;
       }
-      .table-result {
-        width: 100%;
-        margin-bottom: 0;
+
+      .result-section {
+        margin-bottom: 1rem;
       }
-      .table-result td {
-        padding: 0.75rem 0;
-        vertical-align: middle;
-        border-bottom: 1px dashed #dee2e6;
-        font-size: 0.9rem;
+      .spec-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
       }
-      .table-result tr:last-child td {
-        border-bottom: none;
-      }
-      .table-result td:first-child {
+      .result-value {
+        font-size: 1.05rem;
+        color: #1b2a41;
         font-weight: 600;
+      }
+
+      .price-highlight {
+        background: linear-gradient(135deg, #eaf3ff 0%, #b6d4fe 100%);
+        border-left: 4px solid #0466c8;
+        padding: 1.2rem;
+        border-radius: 8px;
+        margin-top: 1.25rem;
+        cursor: pointer;
+        transition: box-shadow 0.2s ease, transform 0.2s ease;
+      }
+      .price-highlight:hover {
+        box-shadow: 0 6px 15px rgba(4, 102, 200, 0.2);
+        transform: translateY(-2px);
+      }
+      .result-label {
+        font-weight: 600;
+        color: #1b2a41;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.3rem;
+      }
+      .total-price {
+        font-size: 1.9rem;
+        font-weight: 700;
+        color: #0354a0;
+        margin-bottom: 0.5rem;
+      }
+      .per-piece-price {
+        font-size: 1.05rem;
         color: #495057;
       }
-      .table-result td:last-child {
-        text-align: right;
-        font-weight: 500;
-        color: #212529;
-      }
-      .section-title {
+
+      .alert-dummy {
+        background-color: #fff3cd;
+        border: 1px solid #ffe69c;
+        color: #664d03;
         font-size: 0.8rem;
+        padding: 0.5rem 0.75rem;
+        border-radius: 8px;
+        margin-bottom: 0.75rem;
+      }
+
+      .modal-header-custom {
+        background: linear-gradient(135deg, #0466c8 0%, #0354a0 100%);
+        color: white;
+        padding: 1rem 1.2rem;
+      }
+      .modal-section-title {
+        font-size: 0.7rem;
         font-weight: 700;
+        letter-spacing: 0.08em;
         text-transform: uppercase;
-        color: #6c757d;
-        margin-top: 1rem;
-        margin-bottom: 0.5rem;
-        letter-spacing: 0.5px;
+        color: #64748b;
+        border-bottom: 1px solid #e2e8f0;
+        padding-bottom: 6px;
+        margin-bottom: 8px;
       }
-      .total-box {
-        background-color: #eaf3ff;
-        border-radius: 10px;
-        padding: 1rem 1.25rem;
-        margin-top: 1.5rem;
-        border: 1px solid #b6d4fe;
+      .modal-total-box {
+        background: #1b2a41;
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin-top: 8px;
       }
-      .total-row {
+      .modal-total-box .text-muted {
+        color: #94a3b8 !important;
+        font-size: 0.82rem;
+      }
+      .modal-big-price {
+        color: #fff;
+        font-size: 1.25rem;
+        font-weight: 800;
+      }
+      .modal-row {
         display: flex;
         justify-content: space-between;
-        align-items: center;
-        margin-bottom: 0.5rem;
+        font-size: 0.82rem;
+        padding: 3px 0;
+        color: #374151;
       }
-      .total-row:last-child {
-        margin-bottom: 0;
-        padding-top: 0.5rem;
-        border-top: 2px dashed #9ec5fe;
-        margin-top: 0.5rem;
-      }
-      .total-label {
+      .modal-row.total-row-inner {
+        border-top: 1px solid #e2e8f0;
+        margin-top: 4px;
+        padding-top: 6px;
         font-weight: 600;
-        color: #495057;
-      }
-      .total-value {
-        font-weight: 700;
-        font-size: 1.1rem;
-        color: #0466c8;
-      }
-      .grand-total {
-        font-size: 1.4rem;
-        color: #0a58ca;
       }
       .badge-soft {
         background-color: #d1e7dd;
         color: #0f5132;
-        padding: 0.25rem 0.5rem;
+        padding: 0.25rem 0.6rem;
         border-radius: 4px;
         font-size: 0.75rem;
         font-weight: 600;
       }
+
       @keyframes fadeIn {
         from {
           opacity: 0;
@@ -205,14 +256,20 @@
     </style>
   </head>
   <body>
-    <div class="header text-center">
-      <div class="container container-custom">
-        <h3><i class="fas fa-print me-2"></i>Kalkulator Cetak Terpadu</h3>
-        <p>Sistem Hitung Otomatis Block Note & Nota</p>
-      </div>
+    <div class="header">
+      <h3>
+        <i class="fas fa-print me-2"></i>Kalkulator Cetak Block Note & Nota
+      </h3>
     </div>
 
     <div class="container container-custom">
+      <div
+        id="errorAlert"
+        class="alert alert-danger"
+        role="alert"
+        style="display: none"
+      ></div>
+
       <div class="row">
         <div class="col-md-5">
           <div class="card">
@@ -221,7 +278,6 @@
             </div>
             <div class="card-body">
               <form id="calculatorForm">
-                <!-- Tipe Produk -->
                 <div class="product-selector">
                   <input
                     type="radio"
@@ -305,7 +361,9 @@
                   >
                   <div class="row g-2">
                     <div class="col-6">
-                      <label class="form-label small mb-1">Jumlah Buku</label>
+                      <label class="form-label small mb-1" id="labelQtyBuku"
+                        >Jumlah Buku</label
+                      >
                       <input
                         type="number"
                         class="form-control form-control-sm text-center"
@@ -313,6 +371,12 @@
                         min="1"
                         required
                       />
+                      <small
+                        class="text-muted mt-1"
+                        id="qtyBukuHint"
+                        style="display: none; font-size: 0.7rem"
+                        >Rim kertas Top yang dicetak</small
+                      >
                     </div>
                     <div class="col-6">
                       <label class="form-label small mb-1" id="labelIsi"
@@ -341,10 +405,34 @@
                   </select>
                 </div>
 
+                <div
+                  class="mb-3"
+                  id="blocknoteCoverSection"
+                  style="display: none"
+                >
+                  <label class="form-label small mb-1"
+                    >Jenis Bahan Cover (Digital Printing A3+)</label
+                  >
+                  <select
+                    class="form-select form-select-sm"
+                    id="jenisCoverMaterial"
+                  >
+                    <option value="" disabled selected>
+                      Pilih bahan cover...
+                    </option>
+                    <option value="AP120">Art Paper 120gr</option>
+                    <option value="AP150">Art Paper 150gr</option>
+                    <option value="AC210">Art Carton 210gr</option>
+                    <option value="AC230">Art Carton 230gr</option>
+                    <option value="AC260">Art Carton 260gr</option>
+                    <option value="AC310">Art Carton 310gr</option>
+                  </select>
+                </div>
+
                 <div class="mb-3">
                   <label
                     class="form-label text-muted small fw-bold text-uppercase"
-                    >3. Finishing & Profit</label
+                    >3. Finishing</label
                   >
                   <select
                     class="form-select form-select-sm mb-2"
@@ -356,11 +444,12 @@
                     <option value="binding">
                       Jilid Lem Punggung (Binding)
                     </option>
-                    <option value="staples">Jilid Staples</option>
-                    <option value="spiral">Jilid Spiral Kawat</option>
+                    <option value="spiral" id="optSpiral">
+                      Jilid Spiral Kawat
+                    </option>
                   </select>
 
-                  <div class="d-flex align-items-center gap-3 mb-3 px-1">
+                  <div class="d-flex align-items-center gap-3 mb-2 px-1">
                     <div class="form-check form-switch">
                       <input
                         class="form-check-input"
@@ -384,16 +473,6 @@
                         for="tambahNumerator"
                         >Numerator</label
                       >
-                    </div>
-                    <div class="input-group input-group-sm">
-                      <input
-                        type="number"
-                        class="form-control text-center"
-                        id="marginKeuntungan"
-                        placeholder="Isi Margin"
-                        min="0"
-                      />
-                      <span class="input-group-text">%</span>
                     </div>
                   </div>
                 </div>
@@ -425,71 +504,152 @@
               <i class="fas fa-receipt me-1"></i> Hasil Kalkulasi
             </div>
             <div class="card-body">
-              <div class="alert alert-info py-2 small mb-3">
-                <i class="fas fa-info-circle me-1"></i>
-                Kertas isi dihitung dari plano
-                <strong>Folio (21.5x33cm)</strong> masuk Mesin Toko 820.
-                <span id="infoCoverAlert"
-                  >Cover dari <strong>A3+ (32x48cm)</strong> mesin
-                  Digital.</span
-                >
+              <div id="dummyWarningBox"></div>
+              <div id="tierWarningBox"></div>
+
+              <div class="result-section">
+                <div class="spec-grid">
+                  <div>
+                    <small class="text-muted">Produk</small><br />
+                    <span id="produkBadge" class="result-value">-</span>
+                  </div>
+                  <div>
+                    <small class="text-muted">Jumlah</small><br />
+                    <span id="jumlahCetakInfo" class="result-value">-</span>
+                  </div>
+                  <div>
+                    <small class="text-muted">Bahan</small><br />
+                    <span id="bahanInfo" class="result-value">-</span>
+                  </div>
+                  <div>
+                    <small class="text-muted">Ukuran</small><br />
+                    <span id="ukuranDetail" class="result-value">-</span>
+                  </div>
+                </div>
               </div>
 
-              <div class="section-title">Bahan Baku & Cetak</div>
-              <table class="table-result">
-                <tbody id="rincianBahan">
-                  <!-- Diisi JS -->
-                </tbody>
-              </table>
+              <div class="result-section" id="extraInfoSection">
+                <small class="text-muted" id="extraInfoLabel">-</small><br />
+                <span id="extraInfoValue" class="result-value">-</span>
+              </div>
 
-              <div class="section-title">Proses Finishing</div>
-              <table class="table-result">
-                <tbody id="rincianFinishing">
-                  <!-- Diisi JS -->
-                </tbody>
-              </table>
+              <hr />
 
-              <div class="total-box">
-                <div class="total-row">
-                  <span class="total-label">Total HPP Produksi</span>
-                  <span class="total-value" id="totalHPP">Rp 0</span>
+              <div class="result-section">
+                <small class="text-muted">Finishing</small><br />
+                <span id="finishingInfo" class="result-value">-</span>
+              </div>
+
+              <a
+                href="#"
+                id="priceHighlightLink"
+                data-bs-toggle="modal"
+                data-bs-target="#breakdownModal"
+                style="text-decoration: none; color: black"
+              >
+                <div class="price-highlight">
+                  <div class="result-label">Total Biaya (margin 30%)</div>
+                  <div class="total-price" id="totalBiaya">-</div>
+                  <div class="result-label mt-3">Harga Jual /Buku</div>
+                  <div class="per-piece-price" id="hargaPerBuah">-</div>
                 </div>
-                <div class="total-row">
-                  <span class="total-label text-muted small">HPP per Buku</span>
-                  <span class="total-value text-muted small" id="hppPerBuku"
-                    >Rp 0</span
-                  >
-                </div>
-                <div class="total-row">
-                  <span class="total-label"
-                    >Margin Profit
-                    <span id="badgeMargin" class="badge-soft ms-1"
-                      >30%</span
-                    ></span
-                  >
-                  <span class="total-value text-success" id="nominalMargin"
-                    >+ Rp 0</span
-                  >
-                </div>
-                <div class="total-row">
-                  <span class="total-label grand-total fw-bold text-primary"
-                    >Harga Jual Total</span
-                  >
-                  <span
-                    class="total-value grand-total fw-bold"
-                    id="hargaJualTotal"
-                    >Rp 0</span
-                  >
-                </div>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Rincian -->
+    <div
+      class="modal fade"
+      id="breakdownModal"
+      tabindex="-1"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div
+          class="modal-content border-0"
+          style="border-radius: 16px; overflow: hidden"
+        >
+          <div class="modal-header modal-header-custom">
+            <div>
+              <h5 class="modal-title mb-1" id="modalTitle">Rincian Biaya</h5>
+              <div class="d-flex align-items-center gap-2 mt-1">
+                <span id="modalProdukBadge"></span>
+                <small id="modalSubtitle" class="text-white-50"></small>
+              </div>
+            </div>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+
+          <div class="modal-body px-3 py-2">
+            <p class="modal-section-title">Plano &amp; Kertas Isi</p>
+            <div class="row align-items-start g-2 mb-2">
+              <div
+                class="col-5 col-md-4 text-center"
+                id="modalPlanoSketchIsi"
+              ></div>
+              <div class="col-12 col-md-8" id="modalPaperDetailsIsi"></div>
+            </div>
+
+            <div id="modalCoverSection" style="display: none">
+              <p class="modal-section-title">Plano &amp; Bahan Cover</p>
+              <div class="row align-items-start g-2 mb-2">
                 <div
-                  class="total-row"
-                  style="border: none; margin-top: 0; padding-top: 2px"
-                >
-                  <span class="total-label">Harga Jual per Buku</span>
-                  <span class="total-value fs-5" id="hargaJualPerBuku"
-                    >Rp 0</span
-                  >
-                </div>
+                  class="col-5 col-md-4 text-center"
+                  id="modalPlanoSketchCover"
+                ></div>
+                <div class="col-12 col-md-8" id="modalPaperDetailsCover"></div>
+              </div>
+            </div>
+
+            <p class="modal-section-title">Cetak Isi</p>
+            <div id="modalPrintDetails" class="mb-2"></div>
+
+            <p class="modal-section-title">Finishing</p>
+            <div id="modalFinishingDetails" class="mb-2"></div>
+
+            <p class="modal-section-title">Margin</p>
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <input
+                type="number"
+                id="marginInput"
+                class="form-control"
+                style="
+                  width: 72px;
+                  text-align: center;
+                  font-weight: 700;
+                  font-size: 1rem;
+                "
+                min="0"
+                max="200"
+                step="1"
+                inputmode="decimal"
+              />
+              <span>%</span>
+              <small class="text-muted" id="defaultMarginHint"
+                >default 30%</small
+              >
+            </div>
+
+            <div class="modal-total-box">
+              <div class="d-flex justify-content-between text-muted mb-1">
+                <span>Subtotal (HPP)</span><span id="modalSubtotal">-</span>
+              </div>
+              <div class="d-flex justify-content-between text-muted mb-3">
+                <span>HPP/buku</span><span id="modalHpp">-</span>
+              </div>
+              <div class="d-flex justify-content-between align-items-baseline">
+                <span class="fw-bold text-white">Total Biaya</span>
+                <span class="modal-big-price" id="modalTotal">-</span>
+              </div>
+              <div class="d-flex justify-content-between text-muted">
+                <span>Harga Jual/buku</span><span id="modalPerPcs">-</span>
               </div>
             </div>
           </div>
@@ -498,256 +658,6 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-
-    <script>
-      // ==========================================
-      // DATABASE HARGA (Konversi ke ukuran dasar)
-      // ==========================================
-      const DB = {
-        kertas_folio: {
-          hvs: 45000, // Harga HVS per RIM (500 lbr Folio)
-          ncr_top: 30000, // Harga NCR Top Putih per RIM Folio
-          ncr_mid: 32000, // Harga NCR Middle per RIM Folio
-          ncr_bot: 28000, // Harga NCR Bottom per RIM Folio
-        },
-        digital_a3: {
-          kertas: 1500, // Harga kertas cover per lbr A3+ (ArtCarton/Ivory)
-          cetak: 4000, // Ongkos cetak per klik A3+
-        },
-        mesin_toko: {
-          plat: 25000, // Harga master plat (per warna/ply)
-          ongkos: 15000, // Ongkos jalan mesin per Rim masuk
-        },
-        finishing: {
-          binding: 15000, // per Rim hasil buku
-          staples: 20000, // per Rim hasil buku
-          spiral: 1500, // per cm lebar buku per Rim
-          porporasi: 10000, // per Rim tambahan
-          numerator: 15000, // per Rim tambahan
-        },
-      };
-
-      // Utility Format Rupiah
-      const formatRp = (angka) =>
-        new Intl.NumberFormat("id-ID", {
-          style: "currency",
-          currency: "IDR",
-          minimumFractionDigits: 0,
-        }).format(angka);
-
-      function toggleForm() {
-        const isNota = document.getElementById("typeNota").checked;
-        const notaSection = document.getElementById("notaPlySection");
-        const labelIsi = document.getElementById("labelIsi");
-        const infoCoverAlert = document.getElementById("infoCoverAlert");
-
-        if (isNota) {
-          notaSection.style.display = "block";
-          labelIsi.innerText = "Jumlah Set per Nota";
-          infoCoverAlert.style.display = "none"; // Nota ga pake cover A3
-        } else {
-          notaSection.style.display = "none";
-          labelIsi.innerText = "Jumlah Lembar per Buku";
-          infoCoverAlert.style.display = "inline";
-        }
-        document.getElementById("resultCard").style.display = "none";
-      }
-
-      function handleUkuranChange() {
-        const preset = document.getElementById("ukuranPreset").value;
-        const inputP = document.getElementById("ukuranPanjang");
-        const inputL = document.getElementById("ukuranLebar");
-
-        if (preset === "custom") {
-          inputP.disabled = false;
-          inputL.disabled = false;
-          inputP.value = "Panjang";
-          inputL.value = "Lebar";
-          inputP.focus();
-        } else {
-          inputP.disabled = true;
-          inputL.disabled = true;
-          const dims = preset.split("|");
-          inputP.value = dims[0]; // Panjang
-          inputL.value = dims[1]; // Lebar
-        }
-      }
-
-      function resetForm() {
-        document.getElementById("calculatorForm").reset();
-        handleUkuranChange();
-        toggleForm();
-        document.getElementById("resultCard").style.display = "none";
-      }
-
-      // Fungsi untuk menghitung berapa banyak potongan kecil muat di kertas plano
-      function hitungYield(planoW, planoH, potongW, potongH) {
-        // Coba orientasi normal
-        let susun1 =
-          Math.floor(planoW / potongW) * Math.floor(planoH / potongH);
-        // Coba orientasi diputar (landscape/portrait swap)
-        let susun2 =
-          Math.floor(planoW / potongH) * Math.floor(planoH / potongW);
-        // Kembalikan hasil terbanyak
-        return Math.max(susun1, susun2);
-      }
-
-      function kalkulasiHarga() {
-        // Ambil Input
-        const isBlocknote = document.getElementById("typeBlocknote").checked;
-        const p =
-          parseFloat(document.getElementById("ukuranPanjang").value) || 0;
-        const l = parseFloat(document.getElementById("ukuranLebar").value) || 0;
-        const qtyBuku = parseInt(document.getElementById("qtyBuku").value) || 0;
-        const isiPerBuku =
-          parseInt(document.getElementById("isiPerBuku").value) || 0;
-        const jumlahPly = isBlocknote
-          ? 1
-          : parseInt(document.getElementById("jumlahPly").value);
-        const jenisFinishing = document.getElementById("jenisFinishing").value;
-        const adaPorporasi = document.getElementById("tambahPorporasi").checked;
-        const adaNumerator = document.getElementById("tambahNumerator").checked;
-        const margin =
-          parseFloat(document.getElementById("marginKeuntungan").value) || 0;
-
-        // Validasi Dimensi
-        if (p === 0 || l === 0) {
-          alert("Masukkan ukuran panjang dan lebar yang valid!");
-          return;
-        }
-
-        // 1. Hitung Daya Muat (Yield) di Plano Folio (21.5 x 33 cm)
-        let yieldFolio = hitungYield(21.5, 33, p, l);
-        if (yieldFolio < 1) {
-          alert(
-            "Ukuran yang Anda masukkan lebih besar dari area cetak kertas Folio (21.5 x 33 cm)!"
-          );
-          return;
-        }
-
-        let htmlBahan = "";
-        let htmlFinishing = "";
-        let totalHPP = 0;
-
-        // Kebutuhan Lembar Isi (Pcs Kecil)
-        const totalSet = qtyBuku * isiPerBuku;
-        // Dikonversi ke Rim Folio
-        const lembarFolioPerPly = Math.ceil(totalSet / yieldFolio);
-        const rimFolioPerPly = Math.ceil(lembarFolioPerPly / 500) || 1; // Minimal 1 Rim
-
-        // --- BIAYA BAHAN KERTAS & CETAK ISI ---
-        if (isBlocknote) {
-          let biayaHVS = rimFolioPerPly * DB.kertas_folio.hvs;
-          htmlBahan += `<tr><td>Kertas HVS (${rimFolioPerPly} Rim Folio)</td><td>${formatRp(
-            biayaHVS
-          )}</td></tr>`;
-          totalHPP += biayaHVS;
-
-          // Biaya Cover A3+ (Asumsi 2 sisi cover: Depan & Belakang = 2 pcs per buku)
-          let yieldA3 = hitungYield(32, 48, p, l);
-          let totalCoverPcs = qtyBuku * 2;
-          let lbrA3 = Math.ceil(totalCoverPcs / yieldA3);
-
-          let biayaCover = lbrA3 * (DB.digital_a3.kertas + DB.digital_a3.cetak);
-          htmlBahan += `<tr><td>Cetak Cover Digital (${lbrA3} lbr A3+)</td><td>${formatRp(
-            biayaCover
-          )}</td></tr>`;
-          totalHPP += biayaCover;
-        } else {
-          let biayaTop = rimFolioPerPly * DB.kertas_folio.ncr_top;
-          htmlBahan += `<tr><td>Kertas NCR Top (${rimFolioPerPly} Rim Folio)</td><td>${formatRp(
-            biayaTop
-          )}</td></tr>`;
-          totalHPP += biayaTop;
-
-          if (jumlahPly >= 2) {
-            let biayaBot = rimFolioPerPly * DB.kertas_folio.ncr_bot;
-            htmlBahan += `<tr><td>Kertas NCR Bottom (${rimFolioPerPly} Rim Folio)</td><td>${formatRp(
-              biayaBot
-            )}</td></tr>`;
-            totalHPP += biayaBot;
-          }
-          if (jumlahPly >= 3) {
-            let qtyMid = jumlahPly - 2;
-            let biayaMid = rimFolioPerPly * qtyMid * DB.kertas_folio.ncr_mid;
-            htmlBahan += `<tr><td>Kertas NCR Middle (${
-              rimFolioPerPly * qtyMid
-            } Rim Folio)</td><td>${formatRp(biayaMid)}</td></tr>`;
-            totalHPP += biayaMid;
-          }
-        }
-
-        // Ongkos Cetak Mesin Toko
-        let totalRimMasukMesin = rimFolioPerPly * jumlahPly;
-        let biayaPlat = jumlahPly * DB.mesin_toko.plat;
-        let biayaOngkos = totalRimMasukMesin * DB.mesin_toko.ongkos;
-
-        htmlBahan += `<tr><td>Plat Master (${jumlahPly} warna/ply)</td><td>${formatRp(
-          biayaPlat
-        )}</td></tr>`;
-        htmlBahan += `<tr><td>Ongkos Cetak (${totalRimMasukMesin} Rim Mesin)</td><td>${formatRp(
-          biayaOngkos
-        )}</td></tr>`;
-        totalHPP += biayaPlat + biayaOngkos;
-
-        // --- BIAYA FINISHING ---
-        // Total ketebalan hasil akhir dalam rim
-        let totalRimBuku = Math.ceil((totalSet * jumlahPly) / 500) || 1;
-
-        let biayaJilid = 0;
-        let namaJilid = "";
-        if (jenisFinishing === "binding") {
-          biayaJilid = totalRimBuku * DB.finishing.binding;
-          namaJilid = "Jilid Lem Punggung";
-        } else if (jenisFinishing === "staples") {
-          biayaJilid = totalRimBuku * DB.finishing.staples;
-          namaJilid = "Jilid Staples";
-        } else if (jenisFinishing === "spiral") {
-          let lebarTerpendek = Math.min(p, l); // Asumsi spiral di sisi terpendek
-          biayaJilid = totalRimBuku * lebarTerpendek * DB.finishing.spiral;
-          namaJilid = `Jilid Spiral (Lebar ${lebarTerpendek}cm)`;
-        }
-        htmlFinishing += `<tr><td>${namaJilid}</td><td>${formatRp(
-          biayaJilid
-        )}</td></tr>`;
-        totalHPP += biayaJilid;
-
-        if (adaPorporasi) {
-          let biayaPorporasi = totalRimBuku * DB.finishing.porporasi;
-          htmlFinishing += `<tr><td>Porporasi Sobekan</td><td>${formatRp(
-            biayaPorporasi
-          )}</td></tr>`;
-          totalHPP += biayaPorporasi;
-        }
-        if (adaNumerator) {
-          let biayaNum = totalRimBuku * DB.finishing.numerator;
-          htmlFinishing += `<tr><td>Numerator Angka</td><td>${formatRp(
-            biayaNum
-          )}</td></tr>`;
-          totalHPP += biayaNum;
-        }
-
-        // --- RENDER TOTAL ---
-        document.getElementById("rincianBahan").innerHTML = htmlBahan;
-        document.getElementById("rincianFinishing").innerHTML = htmlFinishing;
-
-        let hppPerBuku = totalHPP / qtyBuku;
-        let nominalMargin = totalHPP * (margin / 100);
-        let hargaJualTotal = totalHPP + nominalMargin;
-        let hargaJualPerBuku = hargaJualTotal / qtyBuku;
-
-        document.getElementById("totalHPP").innerText = formatRp(totalHPP);
-        document.getElementById("hppPerBuku").innerText = formatRp(hppPerBuku);
-        document.getElementById("badgeMargin").innerText = margin + "%";
-        document.getElementById("nominalMargin").innerText =
-          "+ " + formatRp(nominalMargin);
-        document.getElementById("hargaJualTotal").innerText =
-          formatRp(hargaJualTotal);
-        document.getElementById("hargaJualPerBuku").innerText =
-          formatRp(hargaJualPerBuku);
-
-        document.getElementById("resultCard").style.display = "block";
-      }
-    </script>
+    <script src="script.js"></script>
   </body>
 </html>
