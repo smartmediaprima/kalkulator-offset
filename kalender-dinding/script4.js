@@ -179,7 +179,7 @@ function rekomendasiPlanoMesin(ukuranKode, jumlahLembar, quantity) {
     if (jadi === 0) continue; // kalender tidak muat di plano ini
 
     const waste = hitungWastePerKalender(ukuranKode, planoKode, jadi);
-    const jumlahKertas = Math.ceil(((quantity + 100) * jumlahLembar) / jadi);
+    const jumlahKertas = Math.ceil((quantity * jumlahLembar + 100) / jadi);
 
     for (const mesin of Object.keys(hargaMesin)) {
       const jumlahSet = hitungJumlahSet[mesin](jumlahLembar);
@@ -302,7 +302,7 @@ function hitungBiayaKalender(
     usedMachine = mesinOverride || rec.mesin;
     jadi = hitungJadiPerPlano(ukuran, planoKode);
 
-    jumlahKertas = Math.ceil(((quantity + 100) * jumlahLembar) / jadi);
+    jumlahKertas = Math.ceil((quantity * jumlahLembar + 100) / jadi);
     hargaKertas = offsetPrice[planoKode][jenisKertas];
     biayaKertas = jumlahKertas * hargaKertas;
 
@@ -357,7 +357,6 @@ function hitungBiayaKalender(
     namaJenisKalender: jenisKalender[jumlahLembar] || `${jumlahLembar} lembar`,
     planoKode,
     jadiPerPlano: jadi,
-    planoPerKalender: isDigital ? null : jumlahLembar / jadi,
     jumlahKertas,
     hargaKertas,
     biayaKertas,
@@ -512,8 +511,7 @@ function buildModalContent(h) {
       );
   } else {
     paperHtml =
-      row("Kebutuhan/set", `${formatDecimal(h.planoPerKalender)} lbr plano`) +
-      row("Total kertas", `${formatNumber(h.jumlahKertas)} lbr`) +
+      row("Total kertas", `${formatNumber(h.jumlahKertas)} lembar`) +
       row("Harga/lembar", "Rp " + formatCurrency(h.hargaKertas)) +
       rowTotal(
         "Biaya kertas",
