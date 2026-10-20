@@ -74,16 +74,18 @@ function getSheetsPerPlano(effectiveSize) {
   return Math.max(fit1, fit2, 1); // min 1 untuk hindari pembagian nol
 }
 
-function getJadiPerPlano(calendarType, effectiveSize) {
-  const sheetsPerPlano = getSheetsPerPlano(effectiveSize);
-  return Math.ceil(calendarType / sheetsPerPlano);
+function getTotalPlano(machineType, qty, calendarType, effectiveSize) {
+  const insheet = machineType === "sm52" ? 100 : 0;
+  return Math.ceil(
+    (qty * calendarType + insheet) / getSheetsPerPlano(effectiveSize)
+  );
 }
 
 function getDefaultMarginPct(machineType, qty) {
   if (machineType === "digital") return 68;
   if (qty <= 300) return 38; // dibawah 300
-  if (qty >= 500) return 35; // diatas 500
   if (qty >= 1000) return 28; // diatas 1k
+  if (qty >= 500) return 35; // diatas 500
   return 36; // 301 - 499
 }
 
@@ -95,7 +97,7 @@ function calculatePaperCost(machineType, qty, totalPlano, paperType) {
   if (machineType === "digital") return 0;
   const { prices } = paperData[paperType];
   if (qty < 1000) return totalPlano * prices.perLembar;
-  return Math.round(totalPlano / 500) * prices.perRim;
+  return Math.ceil(totalPlano / 500) * prices.perRim;
 }
 
 function calculatePrintCost(
@@ -103,10 +105,10 @@ function calculatePrintCost(
   qty,
   calendarType,
   paperType,
-  jadiPerPlano
+  totalPlano
 ) {
   if (machineType === "digital") {
-    return qty * jadiPerPlano * paperData[paperType].prices.digital;
+    return totalPlano * paperData[paperType].prices.digital;
   }
   const sets = Math.ceil(calendarType / 2);
   const base = sets * 280000;
@@ -116,17 +118,12 @@ function calculatePrintCost(
 
 function calculateLaminationCost(
   machineType,
-  qty,
   calendarType,
   laminationType,
-  jadiPerPlano
+  totalPlano
 ) {
   if (laminationType === "none") return 0;
   const rate = laminationRates[machineType][laminationType];
-  const totalPlano =
-    machineType === "sm52"
-      ? (qty + 100) * jadiPerPlano // ← pakai param
-      : qty * jadiPerPlano;
   if (machineType === "digital") return totalPlano * rate;
   const { panjang, lebar } = planoData["33x43"];
   return panjang * lebar * rate * totalPlano;
@@ -252,7 +249,6 @@ function buildModalContent(ctx) {
     quantity,
     size: effectiveSize,
     calendarType,
-    jadiPerPlano,
     totalPlano,
     paperType,
     laminationType,
@@ -310,10 +306,9 @@ function buildModalContent(ctx) {
     const priceVal = useRim ? paper.prices.perRim : paper.prices.perLembar;
     const priceLabel = useRim ? "Harga/rim" : "Harga/lembar";
     const totalLabel = useRim
-      ? `${Math.round(totalPlano / 500)} rim`
-      : `${formatCurrency(totalPlano)} lbr`;
+      ? `${Math.ceil(totalPlano / 500)} rim`
+      : `${formatCurrency(totalPlano)} lembar`;
     paperHtml =
-      row("Kebutuhan/set", `${jadiPerPlano} plano`) +
       row("Total plano", `<strong>${totalLabel}</strong>`) +
       row(priceLabel, `Rp ${formatCurrency(priceVal)}`) +
       rowTotal(
@@ -334,7 +329,7 @@ function buildModalContent(ctx) {
     if (overprintAmt > 0) {
       printHtml += row(
         "Overprint",
-        `${formatCurrency(overprintAmt)} lbr — <strong>Rp ${formatCurrency(
+        `${formatCurrency(overprintAmt)} lembar — <strong>Rp ${formatCurrency(
           overprintCost
         )}</strong>`
       );
@@ -411,9 +406,13 @@ function hitungBiayaKalender(
     effectiveSize = `${p}x${l}`;
   }
   const plano = "33x43 cm";
-  const jadiPerPlano = getJadiPerPlano(calendarType, effectiveSize);
-  const totalPlano =
-    machineType === "sm52" ? (qty + 100) * jadiPerPlano : qty * jadiPerPlano;
+  const sheetsPerPlano = getSheetsPerPlano(effectiveSize);
+  const totalPlano = getTotalPlano(
+    machineType,
+    qty,
+    calendarType,
+    effectiveSize
+  );
 
   const paperCost = calculatePaperCost(machineType, qty, totalPlano, paperType);
   const printCost = calculatePrintCost(
@@ -421,15 +420,14 @@ function hitungBiayaKalender(
     qty,
     calendarType,
     paperType,
-    jadiPerPlano
+    totalPlano
   );
   const finishingCost = (qty + 10) * 12000;
   const laminationCost = calculateLaminationCost(
     machineType,
-    qty,
     calendarType,
     laminationType,
-    jadiPerPlano
+    totalPlano
   );
   const hadiah = 30000;
   const subtotal = paperCost + printCost + finishingCost + laminationCost;
@@ -449,7 +447,7 @@ function hitungBiayaKalender(
     quantity: qty,
     size: effectiveSize,
     calendarType,
-    jadiPerPlano,
+    sheetsPerPlano,
     totalPlano,
     paperType,
     laminationType,
@@ -469,7 +467,7 @@ function hitungBiayaKalender(
     jenis_kertas: paperData[paperType].name,
     ukuran_kalender: effectiveSize + " cm",
     plano,
-    jadiPerPlano,
+    sheetsPerPlano,
     totalPlano,
     paperCost,
     printCost,
@@ -531,20 +529,6 @@ function displayResults(hasil) {
   document.getElementById("hargaPerPcs").textContent =
     "Rp " + formatCurrency(hasil.pricePerPiece);
 }
-
-// function updateMachineInfo(qty) {
-//   const el = document.getElementById("machineInfo");
-//   const text = document.getElementById("machineInfoText");
-//   if (qty >= 100) {
-//     text.textContent =
-//       getMachineType(qty) === "digital"
-//         ? "Digital Printing (maks. 100 pcs)"
-//         : "Mesin SM-52 (di atas 100 pcs)";
-//     el.style.display = "block";
-//   } else {
-//     el.style.display = "none";
-//   }
-// }
 
 // ═══════════════════════════════════════════
 //  EVENT LISTENERS
