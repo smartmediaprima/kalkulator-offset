@@ -57,15 +57,34 @@ const planoData = {
 };
 
 const hargaMesin = {
-  "SM-66": 400000, // per set (1 set = 1 lembar desain)
   "SM-74": 420000, // per set (1 set = 2 lembar desain)
 };
 
-// Jumlah set cetak berdasarkan mesin
-const hitungJumlahSet = {
-  "SM-74": (lembar) => Math.ceil(lembar / 2), // 2-up
-  "SM-66": (lembar) => lembar, // 1-up
-};
+// Jumlah baris kalender dalam 1 plano (orientasi landscape, sama dengan sketsa)
+function hitungBarisPerPlano(ukuranKode, planoKode) {
+  const k = sizeData[ukuranKode];
+  const p = planoData[planoKode];
+  const o1 = {
+    cols: Math.floor(p.panjang / k.panjang),
+    rows: Math.floor(p.lebar / k.lebar),
+    pw: p.panjang,
+    ph: p.lebar,
+  };
+  const o2 = {
+    cols: Math.floor(p.lebar / k.panjang),
+    rows: Math.floor(p.panjang / k.lebar),
+    pw: p.lebar,
+    ph: p.panjang,
+  };
+  const ori = o1.cols * o1.rows >= o2.cols * o2.rows ? o1 : o2;
+  // kalau plano portrait, tampilan diputar jadi landscape: baris = kolom
+  return ori.ph > ori.pw ? ori.cols : ori.rows;
+}
+
+// Jumlah set = jenis kalender ÷ baris per plano
+function hitungJumlahSet(ukuranKode, planoKode, jumlahLembar) {
+  return Math.ceil(jumlahLembar / hitungBarisPerPlano(ukuranKode, planoKode));
+}
 
 // Rate laminasi: digital = Rp/lembar (flat), offset = Rp/cm² (per area)
 const rateLaminasi = {
@@ -84,6 +103,7 @@ const paperName = {
   ac210: "Art Carton 210gsm",
   ac230: "Art Carton 230gsm",
   ac260: "Art Carton 260gsm",
+  ac310: "Art Carton 310gsm",
 };
 
 const jenisKalender = {
@@ -153,10 +173,8 @@ function hitungBiayaPotong(quantity) {
 function hitungJadiPerPlano(ukuranKode, planoKode) {
   const k = sizeData[ukuranKode];
   const p = planoData[planoKode];
-  const opsi1 =
-    Math.floor(p.panjang / k.panjang) * Math.floor(p.lebar / k.lebar);
-  const opsi2 =
-    Math.floor(p.lebar / k.panjang) * Math.floor(p.panjang / k.lebar);
+  const opsi1 = Math.floor(p.panjang / k.panjang) * Math.floor(p.lebar / k.lebar);
+  const opsi2 = Math.floor(p.lebar / k.panjang) * Math.floor(p.panjang / k.lebar);
   return Math.max(opsi1, opsi2);
 }
 
@@ -182,10 +200,9 @@ function rekomendasiPlanoMesin(ukuranKode, jumlahLembar, quantity) {
     const jumlahKertas = Math.ceil((quantity * jumlahLembar + 100) / jadi);
 
     for (const mesin of Object.keys(hargaMesin)) {
-      const jumlahSet = hitungJumlahSet[mesin](jumlahLembar);
+      const jumlahSet = hitungJumlahSet(ukuranKode, planoKode, jumlahLembar);
       const biayaCetakBase = jumlahSet * hargaMesin[mesin];
-      const biayaOverprint =
-        quantity > 1000 ? (quantity - 900) * jumlahLembar * 100 : 0;
+      const biayaOverprint = quantity > 1000 ? (quantity - 900) * jumlahLembar * 100 : 0;
       const totalBiayaCetak = biayaCetakBase + biayaOverprint;
 
       combos.push({
@@ -299,17 +316,16 @@ function hitungBiayaKalender(
     planoKode = rec.planoKode;
     rekomendasiMesin = rec.mesin;
     rekomendasiPlano = rec.planoKode;
-    usedMachine = mesinOverride || rec.mesin;
+    usedMachine = hargaMesin[mesinOverride] ? mesinOverride : rec.mesin;
     jadi = hitungJadiPerPlano(ukuran, planoKode);
 
     jumlahKertas = Math.ceil((quantity * jumlahLembar + 100) / jadi);
     hargaKertas = offsetPrice[planoKode][jenisKertas];
     biayaKertas = jumlahKertas * hargaKertas;
 
-    jumlahCetak = hitungJumlahSet[usedMachine](jumlahLembar);
+    jumlahCetak = hitungJumlahSet(ukuran, planoKode, jumlahLembar);
     hargaCetak = hargaMesin[usedMachine];
-    biayaOverprint =
-      quantity > 1000 ? (quantity - 900) * jumlahLembar * 100 : 0;
+    biayaOverprint = quantity > 1000 ? (quantity - 900) * jumlahLembar * 100 : 0;
     biayaCetak = jumlahCetak * hargaCetak + biayaOverprint;
   }
 
@@ -325,8 +341,7 @@ function hitungBiayaKalender(
   }
 
   // --- Finishing ---
-  const hargaFinishing =
-    jenisFinishing === "Jepit Seng" ? 1000 : dataUkuran.lebar * 100;
+  const hargaFinishing = jenisFinishing === "Jepit Seng" ? 1000 : dataUkuran.lebar * 100;
   const jumlahFinishing = quantity + 10;
   const biayaFinishing = hargaFinishing * jumlahFinishing;
 
@@ -341,7 +356,7 @@ function hitungBiayaKalender(
   const subtotal =
     biayaKertas + biayaCetak + biayaLaminasi + biayaFinishing + biayaPotong;
   const margin = hitungMargin(quantity);
-  const totalBiaya = subtotal * (1 + margin) + 50000 + hadiah / quantity;
+  const totalBiaya = subtotal * (1 + margin) + (50000 + hadiah) / quantity;
   const hargaSatuan = totalBiaya / quantity;
 
   const hasil = {
@@ -355,6 +370,7 @@ function hitungBiayaKalender(
     jumlahLembar,
     namaKertas: paperName[jenisKertas],
     namaJenisKalender: jenisKalender[jumlahLembar] || `${jumlahLembar} lembar`,
+    barisPerPlano: isDigital ? null : hitungBarisPerPlano(ukuran, planoKode),
     planoKode,
     jadiPerPlano: jadi,
     jumlahKertas,
@@ -428,13 +444,13 @@ function generateSketsaPlano(h) {
                     c < ori.cols - 1
                       ? `<line x1="${(c + 1) * kw}" y1="0" x2="${
                           (c + 1) * kw
-                        }" y2="${ph}"
+                        }" y2="${finalPh}"
                              stroke="#0466c8" stroke-width="1" stroke-dasharray="4,3"/>`
                       : ""
                   }
                   ${
                     r < ori.rows - 1
-                      ? `<line x1="0" y1="${(r + 1) * kh}" x2="${pw}" y2="${
+                      ? `<line x1="0" y1="${(r + 1) * kh}" x2="${finalPw}" y2="${
                           (r + 1) * kh
                         }"
                              stroke="#0466c8" stroke-width="1" stroke-dasharray="4,3"/>`
@@ -470,7 +486,7 @@ function updateModalTotals(marginPct) {
   if (!hasilTerakhir) return;
   const h = hasilTerakhir;
   const margin = (parseFloat(marginPct) || 0) / 100;
-  const totalBiaya = h.subtotal * (1 + margin) + 50000 + h.hadiah / h.quantity;
+  const totalBiaya = h.subtotal * (1 + margin) + (50000 + h.hadiah) / h.quantity;
   const perPcs = totalBiaya / h.quantity;
   const fmt = (n) => "Rp " + Math.round(n).toLocaleString("id-ID");
   document.getElementById("modalTotal").textContent = fmt(totalBiaya);
@@ -484,9 +500,7 @@ function buildModalContent(h) {
   ).textContent = `${h.namaJenisKalender} · ${h.ukuranLabel}`;
   document.getElementById("modalMachineBadge").innerHTML = h.isDigital
     ? `<span class="badge badge-digital">Digital Printing</span>`
-    : h.mesin === "SM-74"
-    ? `<span class="badge badge-sm74">${h.mesin}</span>`
-    : `<span class="badge badge-sm66">${h.mesin}</span>`;
+    : `<span class="badge badge-sm74">${h.mesin}</span>`;
   document.getElementById("modalSubtitle").textContent = `${
     h.namaKertas
   } · ${formatNumber(h.quantity)} pcs`;
@@ -505,18 +519,12 @@ function buildModalContent(h) {
     paperHtml =
       row("Jumlah lembar", formatNumber(h.jumlahKertas)) +
       row("Harga/lembar", "Rp " + formatCurrency(h.hargaKertas)) +
-      rowTotal(
-        "Biaya cetak",
-        `<strong>Rp ${formatCurrency(h.biayaCetak)}</strong>`
-      );
+      rowTotal("Biaya cetak", `<strong>Rp ${formatCurrency(h.biayaCetak)}</strong>`);
   } else {
     paperHtml =
       row("Total kertas", `${formatNumber(h.jumlahKertas)} lembar`) +
       row("Harga/lembar", "Rp " + formatCurrency(h.hargaKertas)) +
-      rowTotal(
-        "Biaya kertas",
-        `<strong>Rp ${formatCurrency(h.biayaKertas)}</strong>`
-      );
+      rowTotal("Biaya kertas", `<strong>Rp ${formatCurrency(h.biayaKertas)}</strong>`);
   }
   document.getElementById("modalPaperDetails").innerHTML = paperHtml;
 
@@ -532,9 +540,7 @@ function buildModalContent(h) {
     if (h.jumlahOverprint > 0) {
       printHtml += row(
         "Overprint",
-        `${formatNumber(h.jumlahOverprint)} lbr — Rp ${formatCurrency(
-          h.biayaOverprint
-        )}`
+        `${formatNumber(h.jumlahOverprint)} lbr — Rp ${formatCurrency(h.biayaOverprint)}`
       );
     }
     printHtml += rowTotal(
@@ -561,8 +567,7 @@ function buildModalContent(h) {
   // Subtotal & HPP
   document.getElementById("modalSubtotal").textContent =
     "Rp " + formatCurrency(h.subtotal);
-  document.getElementById("modalHpp").textContent =
-    "Rp " + formatCurrency(h.hpp);
+  document.getElementById("modalHpp").textContent = "Rp " + formatCurrency(h.hpp);
 
   // Margin input
   const defaultMarginPct = (h.margin * 100).toFixed(0);
@@ -584,7 +589,6 @@ function resetForm() {
   document.getElementById("errorAlert").style.display = "none";
   document.getElementById("rekomendasiMesin").textContent = "";
   document.getElementById("mesinPilihan").disabled = true;
-  document.getElementById("customSizeWrapper").style.display = "none";
   document.getElementById("customPanjang").disabled = true;
   document.getElementById("customLebar").disabled = true;
 }
@@ -602,13 +606,7 @@ function displayResults(h) {
 
   const badge = document.getElementById("mesinBadge");
   badge.textContent = h.mesin;
-  badge.className =
-    "badge " +
-    (h.mesin === "SM-74"
-      ? "badge-sm74"
-      : h.mesin === "SM-66"
-      ? "badge-sm66"
-      : "badge-digital");
+  badge.className = "badge " + (h.mesin === "SM-74" ? "badge-sm74" : "badge-digital");
 
   document.getElementById("jumlahCetak").textContent = `${formatNumber(
     h.quantity
@@ -706,45 +704,43 @@ document.getElementById("size").addEventListener("change", function () {
   }
 });
 
+["customLebar", "customPanjang"].forEach((id) =>
+  document.getElementById(id).addEventListener("input", updateRekomendasi)
+);
+
 document.getElementById("marginInput").addEventListener("input", function () {
   updateModalTotals(this.value);
 });
 
 // Isi modal saat area total biaya (price-highlight) diklik, sebelum modal terbuka
-document
-  .getElementById("priceHighlight")
-  .addEventListener("click", function () {
-    if (!hasilTerakhir) return;
-    buildModalContent(hasilTerakhir);
-  });
+document.getElementById("priceHighlight").addEventListener("click", function () {
+  if (!hasilTerakhir) return;
+  buildModalContent(hasilTerakhir);
+});
 
-document
-  .getElementById("calculatorForm")
-  .addEventListener("submit", function (e) {
-    e.preventDefault();
+document.getElementById("calculatorForm").addEventListener("submit", function (e) {
+  e.preventDefault();
 
-    const quantity = parseInt(document.getElementById("quantity").value);
-    const ukuran = document.getElementById("size").value;
-    const jumlahLembar = parseInt(document.getElementById("type").value);
-    const jenisKertas = document.getElementById("paper").value;
-    const jenisLaminasi = document.getElementById("lamination").value;
-    const jenisFinishing = document.getElementById("finishing").value;
-    const isDigital = ukuran === "32x48 cm" && quantity <= 200;
-    const mesinOverride = isDigital
-      ? null
-      : document.getElementById("mesinPilihan").value;
+  const quantity = parseInt(document.getElementById("quantity").value);
+  const ukuran = document.getElementById("size").value;
+  const jumlahLembar = parseInt(document.getElementById("type").value);
+  const jenisKertas = document.getElementById("paper").value;
+  const jenisLaminasi = document.getElementById("lamination").value;
+  const jenisFinishing = document.getElementById("finishing").value;
+  const isDigital = ukuran === "32x48 cm" && quantity <= 200;
+  const mesinOverride = isDigital ? null : document.getElementById("mesinPilihan").value;
 
-    const hasil = hitungBiayaKalender(
-      quantity,
-      ukuran,
-      jumlahLembar,
-      jenisKertas,
-      jenisLaminasi,
-      jenisFinishing,
-      mesinOverride
-    );
-    if (hasil) displayResults(hasil);
-  });
+  const hasil = hitungBiayaKalender(
+    quantity,
+    ukuran,
+    jumlahLembar,
+    jenisKertas,
+    jenisLaminasi,
+    jenisFinishing,
+    mesinOverride
+  );
+  if (hasil) displayResults(hasil);
+});
 
 document.getElementById("resetBtn").addEventListener("click", resetForm);
 window.addEventListener("load", resetForm);
