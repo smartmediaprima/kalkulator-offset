@@ -4,26 +4,26 @@
 
 const offsetPrice = {
   "65x100 cm": {
-    hvs70: 900,
-    hvs80: 1000,
-    hvs100: 1200,
-    ap120: 1600,
-    ap150: 1900,
-    ac210: 3000,
-    ac230: 3200,
+    hvs70: 800,
+    hvs80: 868,
+    hvs100: 1000,
+    ap120: 1700,
+    ap150: 2000,
+    ac210: 2300,
+    ac230: 3000,
     ac260: 3300,
-    ac310: 4200,
+    ac310: 3500,
   },
   "79x109 cm": {
-    hvs70: 1200,
-    hvs80: 1300,
-    hvs100: 1400,
-    ap120: 2200,
+    hvs70: 1500,
+    hvs80: 1700,
+    hvs100: 1900,
+    ap120: 2000,
     ap150: 2500,
     ac210: 3100,
     ac230: 3400,
-    ac260: 3600,
-    ac310: 4500,
+    ac260: 4500,
+    ac310: 5000,
   },
 };
 
@@ -57,33 +57,30 @@ const planoData = {
 };
 
 const hargaMesin = {
-  "SM-74": 420000, // per set (1 set = 2 lembar desain)
+  "SM-74": 420000, // per set
 };
 
-// Jumlah baris kalender dalam 1 plano (orientasi landscape, sama dengan sketsa)
-function hitungBarisPerPlano(ukuranKode, planoKode) {
+// Area cetak efektif mesin (cm)
+const areaCetak = {
+  "SM-74": { panjang: 51, lebar: 74 },
+};
+
+// Berapa lembar kalender yang muat di area cetak mesin (kertas boleh diputar)
+function hitungPerAreaCetak(ukuranKode, mesin) {
   const k = sizeData[ukuranKode];
-  const p = planoData[planoKode];
-  const o1 = {
-    cols: Math.floor(p.panjang / k.panjang),
-    rows: Math.floor(p.lebar / k.lebar),
-    pw: p.panjang,
-    ph: p.lebar,
-  };
-  const o2 = {
-    cols: Math.floor(p.lebar / k.panjang),
-    rows: Math.floor(p.panjang / k.lebar),
-    pw: p.lebar,
-    ph: p.panjang,
-  };
-  const ori = o1.cols * o1.rows >= o2.cols * o2.rows ? o1 : o2;
-  // kalau plano portrait, tampilan diputar jadi landscape: baris = kolom
-  return ori.ph > ori.pw ? ori.cols : ori.rows;
+  const a = areaCetak[mesin];
+  const opsi1 = Math.floor(a.panjang / k.panjang) * Math.floor(a.lebar / k.lebar);
+  const opsi2 = Math.floor(a.lebar / k.panjang) * Math.floor(a.panjang / k.lebar);
+  return Math.max(opsi1, opsi2);
 }
 
-// Jumlah set = jenis kalender ÷ baris per plano
-function hitungJumlahSet(ukuranKode, planoKode, jumlahLembar) {
-  return Math.ceil(jumlahLembar / hitungBarisPerPlano(ukuranKode, planoKode));
+// Jumlah set = jenis kalender / jumlah lembar yang muat di area cetak.
+// Kalau hanya muat 1, hasilnya otomatis = jumlahLembar (tidak perlu cabang terpisah).
+// Return null jika kalender tidak muat di area cetak.
+function hitungJumlahSet(ukuranKode, mesin, jumlahLembar) {
+  const jadi = hitungPerAreaCetak(ukuranKode, mesin);
+  if (jadi === 0) return null;
+  return Math.ceil(jumlahLembar / jadi);
 }
 
 // Rate laminasi: digital = Rp/lembar (flat), offset = Rp/cm² (per area)
@@ -197,12 +194,13 @@ function rekomendasiPlanoMesin(ukuranKode, jumlahLembar, quantity) {
     if (jadi === 0) continue; // kalender tidak muat di plano ini
 
     const waste = hitungWastePerKalender(ukuranKode, planoKode, jadi);
-    const jumlahKertas = Math.ceil((quantity * jumlahLembar + 100) / jadi);
+    const jumlahKertas = Math.ceil(((quantity + 100) * jumlahLembar) / jadi);
 
     for (const mesin of Object.keys(hargaMesin)) {
-      const jumlahSet = hitungJumlahSet(ukuranKode, planoKode, jumlahLembar);
+      const jumlahSet = hitungJumlahSet(ukuranKode, mesin, jumlahLembar);
+      if (jumlahSet === null) continue; // tidak muat di area cetak mesin
       const biayaCetakBase = jumlahSet * hargaMesin[mesin];
-      const biayaOverprint = quantity > 1000 ? (quantity - 900) * jumlahLembar * 100 : 0;
+      const biayaOverprint = quantity > 1000 ? (quantity - 1000) * jumlahLembar * 100 : 0;
       const totalBiayaCetak = biayaCetakBase + biayaOverprint;
 
       combos.push({
@@ -319,13 +317,13 @@ function hitungBiayaKalender(
     usedMachine = hargaMesin[mesinOverride] ? mesinOverride : rec.mesin;
     jadi = hitungJadiPerPlano(ukuran, planoKode);
 
-    jumlahKertas = Math.ceil((quantity * jumlahLembar + 100) / jadi);
+    jumlahKertas = Math.ceil(((quantity + 100) * jumlahLembar) / jadi);
     hargaKertas = offsetPrice[planoKode][jenisKertas];
     biayaKertas = jumlahKertas * hargaKertas;
 
-    jumlahCetak = hitungJumlahSet(ukuran, planoKode, jumlahLembar);
+    jumlahCetak = hitungJumlahSet(ukuran, usedMachine, jumlahLembar);
     hargaCetak = hargaMesin[usedMachine];
-    biayaOverprint = quantity > 1000 ? (quantity - 900) * jumlahLembar * 100 : 0;
+    biayaOverprint = quantity > 1000 ? (quantity - 1000) * jumlahLembar * 100 : 0;
     biayaCetak = jumlahCetak * hargaCetak + biayaOverprint;
   }
 
@@ -370,7 +368,6 @@ function hitungBiayaKalender(
     jumlahLembar,
     namaKertas: paperName[jenisKertas],
     namaJenisKalender: jenisKalender[jumlahLembar] || `${jumlahLembar} lembar`,
-    barisPerPlano: isDigital ? null : hitungBarisPerPlano(ukuran, planoKode),
     planoKode,
     jadiPerPlano: jadi,
     jumlahKertas,
@@ -379,7 +376,7 @@ function hitungBiayaKalender(
     jumlahCetak,
     hargaCetak,
     biayaCetak,
-    jumlahOverprint: quantity > 1000 && !isDigital ? quantity - 900 : 0,
+    jumlahOverprint: quantity > 1000 && !isDigital ? quantity - 1000 : 0,
     biayaOverprint,
     namaLaminasi: laminasi[jenisLaminasi],
     biayaLaminasi,
