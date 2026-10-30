@@ -76,9 +76,7 @@ function getSheetsPerPlano(effectiveSize) {
 
 function getTotalPlano(machineType, qty, calendarType, effectiveSize) {
   const insheet = machineType === "sm52" ? 100 : 0;
-  return Math.ceil(
-    (qty * calendarType + insheet) / getSheetsPerPlano(effectiveSize)
-  );
+  return Math.ceil(((qty + insheet) * calendarType) / getSheetsPerPlano(effectiveSize));
 }
 
 function getDefaultMarginPct(machineType, qty) {
@@ -100,28 +98,17 @@ function calculatePaperCost(machineType, qty, totalPlano, paperType) {
   return Math.ceil(totalPlano / 500) * prices.perRim;
 }
 
-function calculatePrintCost(
-  machineType,
-  qty,
-  calendarType,
-  paperType,
-  totalPlano
-) {
+function calculatePrintCost(machineType, qty, calendarType, paperType, totalPlano) {
   if (machineType === "digital") {
     return totalPlano * paperData[paperType].prices.digital;
   }
   const sets = Math.ceil(calendarType / 2);
   const base = sets * 280000;
-  const overprint = qty > 1000 ? (qty - 900) * sets * 80 : 0;
+  const overprint = qty > 1000 ? (qty - 1000) * sets * 80 : 0;
   return base + overprint;
 }
 
-function calculateLaminationCost(
-  machineType,
-  calendarType,
-  laminationType,
-  totalPlano
-) {
+function calculateLaminationCost(machineType, calendarType, laminationType, totalPlano) {
   if (laminationType === "none") return 0;
   const rate = laminationRates[machineType][laminationType];
   if (machineType === "digital") return totalPlano * rate;
@@ -170,17 +157,13 @@ function generatePlanoSketch(effectiveSize) {
               fill="#e8f4ff" stroke="#0466c8" stroke-width="0.25"/>
         ${
           c < ori.cols - 1
-            ? `<line x1="${(c + 1) * kw}" y1="0" x2="${
-                (c + 1) * kw
-              }" y2="${finalPh}"
+            ? `<line x1="${(c + 1) * kw}" y1="0" x2="${(c + 1) * kw}" y2="${finalPh}"
                    stroke="#0466c8" stroke-width="0.5" stroke-dasharray="4,3"/>`
             : ""
         }
         ${
           r < ori.rows - 1
-            ? `<line x1="0" y1="${(r + 1) * kh}" x2="${finalPw}" y2="${
-                (r + 1) * kh
-              }"
+            ? `<line x1="0" y1="${(r + 1) * kh}" x2="${finalPw}" y2="${(r + 1) * kh}"
                    stroke="#0466c8" stroke-width="0.5" stroke-dasharray="4,3"/>`
             : ""
         }
@@ -227,20 +210,15 @@ function updateModalTotals(marginPct) {
   const total = subtotal * (1 + margin) + 50000 + hadiah / quantity;
   const perPcs = total / quantity;
 
-  document.getElementById("modalSubtotal").textContent =
-    "Rp " + formatCurrency(subtotal);
+  document.getElementById("modalSubtotal").textContent = "Rp " + formatCurrency(subtotal);
   document.getElementById("modalHpp").textContent =
     "Rp " + formatCurrency(subtotal / quantity);
-  document.getElementById("modalTotal").textContent =
-    "Rp " + formatCurrency(total);
-  document.getElementById("modalPerPcs").textContent =
-    "Rp " + formatCurrency(perPcs);
+  document.getElementById("modalTotal").textContent = "Rp " + formatCurrency(total);
+  document.getElementById("modalPerPcs").textContent = "Rp " + formatCurrency(perPcs);
 
   // Sync main card
-  document.getElementById("totalBiaya").textContent =
-    "Rp " + formatCurrency(total);
-  document.getElementById("hargaPerPcs").textContent =
-    "Rp " + formatCurrency(perPcs);
+  document.getElementById("totalBiaya").textContent = "Rp " + formatCurrency(total);
+  document.getElementById("hargaPerPcs").textContent = "Rp " + formatCurrency(perPcs);
 }
 
 function buildModalContent(ctx) {
@@ -293,14 +271,8 @@ function buildModalContent(ctx) {
   if (IS_DIG) {
     paperHtml =
       row("Harga/plano", `Rp ${formatCurrency(paper.prices.digital)}`) +
-      row(
-        "Total plano",
-        `<strong>${formatCurrency(totalPlano)} plano</strong>`
-      ) +
-      rowTotal(
-        "Biaya cetak",
-        `<strong>Rp ${formatCurrency(printCost)}</strong>`
-      );
+      row("Total plano", `<strong>${formatCurrency(totalPlano)} plano</strong>`) +
+      rowTotal("Biaya cetak", `<strong>Rp ${formatCurrency(printCost)}</strong>`);
   } else {
     const useRim = quantity >= 1000;
     const priceVal = useRim ? paper.prices.perRim : paper.prices.perLembar;
@@ -311,10 +283,7 @@ function buildModalContent(ctx) {
     paperHtml =
       row("Total plano", `<strong>${totalLabel}</strong>`) +
       row(priceLabel, `Rp ${formatCurrency(priceVal)}`) +
-      rowTotal(
-        "Biaya kertas",
-        `<strong>Rp ${formatCurrency(paperCost)}</strong>`
-      );
+      rowTotal("Biaya kertas", `<strong>Rp ${formatCurrency(paperCost)}</strong>`);
   }
   document.getElementById("modalPaperDetails").innerHTML = paperHtml;
 
@@ -324,8 +293,7 @@ function buildModalContent(ctx) {
     printHtml = `<p class="text-muted small mb-0 py-1">Sudah termasuk dalam biaya plano di atas.</p>`;
   } else {
     printHtml =
-      row("Jumlah set", sets) +
-      row("Harga/set", `Rp ${formatCurrency(280000)}`);
+      row("Jumlah set", sets) + row("Harga/set", `Rp ${formatCurrency(280000)}`);
     if (overprintAmt > 0) {
       printHtml += row(
         "Overprint",
@@ -345,8 +313,7 @@ function buildModalContent(ctx) {
   document.getElementById("modalLaminasiFinishing").innerHTML =
     row(
       "Laminasi",
-      lamiLabel +
-        (laminationCost > 0 ? ` — Rp ${formatCurrency(laminationCost)}` : "")
+      lamiLabel + (laminationCost > 0 ? ` — Rp ${formatCurrency(laminationCost)}` : "")
     ) +
     row(
       "Finishing",
@@ -369,13 +336,7 @@ function buildModalContent(ctx) {
 //  MAIN CALCULATION
 // ═══════════════════════════════════════════
 
-function hitungBiayaKalender(
-  qty,
-  size,
-  calendarType,
-  paperType,
-  laminationType
-) {
+function hitungBiayaKalender(qty, size, calendarType, paperType, laminationType) {
   if (!qty || !size || !calendarType || !paperType || !laminationType) {
     showError("Mohon lengkapi semua data.");
     return null;
@@ -407,12 +368,7 @@ function hitungBiayaKalender(
   }
   const plano = "33x43 cm";
   const sheetsPerPlano = getSheetsPerPlano(effectiveSize);
-  const totalPlano = getTotalPlano(
-    machineType,
-    qty,
-    calendarType,
-    effectiveSize
-  );
+  const totalPlano = getTotalPlano(machineType, qty, calendarType, effectiveSize);
 
   const paperCost = calculatePaperCost(machineType, qty, totalPlano, paperType);
   const printCost = calculatePrintCost(
@@ -578,25 +534,17 @@ document.getElementById("marginInput").addEventListener("input", function () {
   if (!isNaN(v) && v >= 0) updateModalTotals(v);
 });
 
-document
-  .getElementById("calculatorForm")
-  .addEventListener("submit", function (e) {
-    e.preventDefault();
-    const qty = parseInt(document.getElementById("quantity").value);
-    const size = document.getElementById("size").value;
-    const calendarType = parseInt(document.getElementById("type").value);
-    const paperType = document.getElementById("paper").value;
-    const laminationType = document.getElementById("lamination").value;
+document.getElementById("calculatorForm").addEventListener("submit", function (e) {
+  e.preventDefault();
+  const qty = parseInt(document.getElementById("quantity").value);
+  const size = document.getElementById("size").value;
+  const calendarType = parseInt(document.getElementById("type").value);
+  const paperType = document.getElementById("paper").value;
+  const laminationType = document.getElementById("lamination").value;
 
-    const hasil = hitungBiayaKalender(
-      qty,
-      size,
-      calendarType,
-      paperType,
-      laminationType
-    );
-    if (hasil) displayResults(hasil);
-  });
+  const hasil = hitungBiayaKalender(qty, size, calendarType, paperType, laminationType);
+  if (hasil) displayResults(hasil);
+});
 
 document.getElementById("resetBtn").addEventListener("click", resetForm);
 window.addEventListener("load", resetForm);
